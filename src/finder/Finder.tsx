@@ -11,7 +11,7 @@ interface FinderProps {
 }
 
 const Finder: React.FC<FinderProps> = ({ hide, onClose }) => {
-  const [history, setHistory] = useState<string[]>(["/"]);
+  const [history] = useState<string[]>(["/"]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState<number | null>(3);
