@@ -1,5 +1,5 @@
-import React, { useRef, useState, useEffect } from 'react';
-import AnswerCard from './FourAnswerQuestion';
+import React, { useRef, useState, useEffect } from "react";
+import AnswerCard from "./FourAnswerQuestion";
 
 interface DraggableAnswerCardProps {
   question: string;
@@ -36,11 +36,11 @@ const DraggableAnswerCard: React.FC<DraggableAnswerCardProps> = ({
       }
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
     };
   }, [dragging, offset, ghostPos]);
 
@@ -58,15 +58,19 @@ const DraggableAnswerCard: React.FC<DraggableAnswerCardProps> = ({
       {dragging && (
         <div
           style={{
-            position: 'fixed',
+            position: "fixed",
             top: ghostPos.y,
             left: ghostPos.x,
             opacity: 0.5,
             zIndex: 1000,
-            pointerEvents: 'none',
+            pointerEvents: "none",
           }}
         >
-          <AnswerCard question={question} options={options} onSelect={onSelect} />
+          <AnswerCard
+            question={question}
+            options={options}
+            onSelect={onSelect}
+          />
         </div>
       )}
 
@@ -74,11 +78,11 @@ const DraggableAnswerCard: React.FC<DraggableAnswerCardProps> = ({
         ref={cardRef}
         onMouseDown={handleMouseDown}
         style={{
-          position: 'absolute',
+          position: "absolute",
           top: position.y,
           left: position.x,
-          cursor: 'move',
-          pointerEvents: dragging ? 'none' : 'auto',
+          cursor: "move",
+          pointerEvents: dragging ? "none" : "auto",
         }}
       >
         <AnswerCard question={question} options={options} onSelect={onSelect} />

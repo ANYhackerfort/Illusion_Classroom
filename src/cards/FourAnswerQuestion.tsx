@@ -1,7 +1,6 @@
-import React from 'react';
-import { Card, CardContent, Button } from '@mui/material';
-import PhotoCard from './PhotoCard';
-import './FourAnswerQuestion.css';
+import React from "react";
+import { Card, CardContent, Button } from "@mui/material";
+import "./FourAnswerQuestion.css";
 
 interface AnswerCardProps {
   question: string;
@@ -9,7 +8,11 @@ interface AnswerCardProps {
   onSelect: (option: string) => void;
 }
 
-const AnswerCard: React.FC<AnswerCardProps> = ({ question, options, onSelect }) => {
+const AnswerCard: React.FC<AnswerCardProps> = ({
+  question,
+  options,
+  onSelect,
+}) => {
   return (
     <Card className="card">
       <CardContent>
@@ -17,17 +20,17 @@ const AnswerCard: React.FC<AnswerCardProps> = ({ question, options, onSelect }) 
         <div className="options-wrapper">
           {options.map((option, index) => (
             <Button
-                key={index}
-                variant="outlined"
-                className="option-button"
-                fullWidth
-                onClick={() => onSelect(option)}
+              key={index}
+              variant="outlined"
+              className="option-button"
+              fullWidth
+              onClick={() => onSelect(option)}
             >
-                <div className="button-content">
+              <div className="button-content">
                 <span className="option-text">{option}</span>
-                </div>
+              </div>
             </Button>
-            ))}
+          ))}
         </div>
       </CardContent>
     </Card>

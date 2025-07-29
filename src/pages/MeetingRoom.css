@@ -1,8 +1,8 @@
 .meeting-room-root {
   display: flex;
   flex-direction: column;
-  align-items: center;    /* center children horizontally */
-  gap: 24px;              /* space between video and gallery */
+  align-items: center; /* center children horizontally */
+  gap: 24px; /* space between video and gallery */
   padding: 24px;
 }
 

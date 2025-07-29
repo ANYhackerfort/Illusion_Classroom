@@ -1,0 +1,48 @@
+.bot-display-container {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  height: 300px;
+  margin: 24px auto;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Background layer */
+.bot-display-background {
+  background-color: #f0f0f0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bot-display-text {
+  font-size: 20px;
+  font-weight: 600;
+  color: #000;
+}
+
+/* Top overlay grid */
+.bot-display-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* pass-through for now */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bot-grid-placeholder {
+  width: 90%;
+  height: 90%;
+  border: 2px dashed #ccc;
+  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}

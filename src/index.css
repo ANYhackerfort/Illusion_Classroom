@@ -16,6 +16,17 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+* {
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+img {
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
 a {
   font-weight: 500;
   color: #646cff;

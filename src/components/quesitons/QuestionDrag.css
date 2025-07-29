@@ -1,0 +1,31 @@
+.drop-zone {
+  width: 97%;
+  height: 94%;
+  /* existing styles */
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 0;
+  background: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  overflow: auto;
+}
+
+.placeholder-text {
+  color: #777;
+  font-size: 16px;
+  text-align: center;
+  padding: 16px;
+  width: 100%;
+}
+
+.questions-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  width: 100%;
+}

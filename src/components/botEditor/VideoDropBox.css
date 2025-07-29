@@ -1,0 +1,23 @@
+.video-drop-box {
+  background-color: #f9f9f9;
+  border-radius: 16px;
+  padding: 40px;
+  margin: 12px;
+  min-height: 150px;
+  min-width: 300px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); /* 💥 Heavier shadow */
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555;
+  font-size: 14px;
+  text-align: center;
+}
+
+.video-drop-box.dragging {
+  border-color: #999;
+  background-color: #f0f0f0;
+}
