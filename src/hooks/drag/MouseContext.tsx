@@ -26,7 +26,7 @@ export const MouseProvider: React.FC<{ children: ReactNode }> = ({
   const positionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isMouseDown, setIsMouseDown] = useState(false);
   const [draggedItem, setDraggedItem] = useState<DraggedItem | null>(null);
-  const [draggedItemSizePercent, setDraggedItemSizePercent] = useState(100);
+  const [draggedItemSizePercent] = useState(100);
 
   const handlerMap = useRef<Map<string, () => void>>(new Map());
 

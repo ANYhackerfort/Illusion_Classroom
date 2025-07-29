@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import GhostCard from "./components/quesitons/QuestionCardGhost";
 import { useMouse } from "./hooks/drag/MouseContext";
 

@@ -54,7 +54,7 @@ const VideoSettingsPage: React.FC = () => {
           Drag videos into the boxes in the order you want them to be played.
         </p>
         <VideoCarousel>
-          {[...videos, undefined].map((file, index) => (
+          {[...videos, undefined].map((index) => (
             <VideoDrop
               key={index}
               onFileSelect={(file) => handleSelect(file, index)}

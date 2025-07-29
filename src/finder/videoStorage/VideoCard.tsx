@@ -10,11 +10,8 @@ interface VideoCardProps {
 }
 
 const VideoCard: React.FC<VideoCardProps> = ({
-  location,
   thumbnail,
   title,
-  createdTime,
-  lastAccessed,
 }) => {
   return (
     <div className="video-card-wrapper">

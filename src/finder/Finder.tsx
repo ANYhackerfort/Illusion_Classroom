@@ -56,11 +56,11 @@ const Finder: React.FC<FinderProps> = ({ hide, onClose }) => {
     if (currentIndex < history.length - 1) setCurrentIndex(currentIndex + 1);
   };
 
-  const navigateTo = (path: string) => {
-    const newHistory = history.slice(0, currentIndex + 1).concat(path);
-    setHistory(newHistory);
-    setCurrentIndex(newHistory.length - 1);
-  };
+  // const navigateTo = (path: string) => {
+  //   const newHistory = history.slice(0, currentIndex + 1).concat(path);
+  //   setHistory(newHistory);
+  //   setCurrentIndex(newHistory.length - 1);
+  // };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;

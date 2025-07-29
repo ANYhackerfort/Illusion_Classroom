@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React from "react";
 import "./Questions.css";
 import VideoPlayerWithBar from "../../components/videoEditor/VideoWithBar";
 
 const QuestionsPage: React.FC = () => {
-  const [showInnerBar, setShowInnerBar] = useState(true);
+  // const [showInnerBar, setShowInnerBar] = useState(true);
 
   return (
     <div className="video-settings-page">
