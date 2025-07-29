@@ -8,7 +8,7 @@ const JoinMeeting: React.FC = () => {
   const navigate = useNavigate();
 
   const handleJoin = () => {
-    navigate("/meeting-room");
+    navigate("/meeting-settings"); // TODO: TEMP
   };
 
   return (
