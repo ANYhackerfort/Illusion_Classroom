@@ -1,5 +1,7 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import "./VideoDisplay.css";
+import { useMouse } from '../../hooks/drag/MouseContext';
+import { getVideoById } from '../../indexDB/videoStorage';
 
 interface QuestionCardData {
   question: string;
@@ -16,7 +18,7 @@ interface VideoSegmentData {
 
 interface VideoDisplayProps {
   videoTime: number;
-  editedLength: number;
+  editedLength: React.RefObject<number>;
   setVideoStopped: (stopped: boolean) => void;
   setVideoDuration: (duration: number) => void;
   metaData: VideoSegmentData[];
@@ -24,42 +26,68 @@ interface VideoDisplayProps {
   currentQuestionCard: QuestionCardData | null;
   setCurrentQuestionCard: (card: QuestionCardData | null) => void;
   currentTimeRef: React.RefObject<number>;
+  currentUniqueID: React.RefObject<string>;
+  videoFileRef: React.RefObject<File | null>;
+  videoSrc: string | null;
+  setVideoSrc: (videoSrc: string | null) => void;
+  videoDroppedRef: React.RefObject<boolean>;
+  setVideoSegments: (segments: VideoSegmentData[]) => void;
+  updateWidths: (base: number, inner: number) => void;
 }
 
 const VideoDisplay: React.FC<VideoDisplayProps> = ({
   videoTime,
-  setVideoStopped,
   setVideoDuration,
   editedLength,
   metaData,
-  videoStopped,
   currentQuestionCard,
   setCurrentQuestionCard,
   currentTimeRef,
+  currentUniqueID,
+  videoFileRef,
+  videoSrc,
+  setVideoSrc,
+  videoDroppedRef,
+  setVideoSegments,
+  updateWidths,
 }) => {
-  const [videoSrc, setVideoSrc] = useState<string | null>(null);
+  // const [videoSrc, setVideoSrc] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+  // const [isPlaying, setIsPlaying] = useState(false);
   // const currentTimeRef = useRef<number>(0);
 
   const metaDataRef = useRef<VideoSegmentData[]>(metaData);
-  const isPlayingRef = useRef(isPlaying);
-  const videoStoppedRef = useRef(videoStopped);
+  const isPlayingRef = useRef(false); // actaul video
+  const videoStoppedRef = useRef(true); // The entirety of video with question cards
+  const videoOverRef = useRef(false);
+
+  const { draggedItem } = useMouse();
+
+  const PIXELS_PER_SECOND = 100;
 
   useEffect(() => {
     metaDataRef.current = metaData;
   }, [metaData]);
 
-  useEffect(() => {
-    isPlayingRef.current = isPlaying;
-  }, [isPlaying]);
+  // useEffect(() => {
+  //   isPlayingRef.current = isPlaying;
+  // }, [isPlaying]);
 
-  useEffect(() => {
-    videoStoppedRef.current = videoStopped;
-  }, [videoStopped]);
+  // useEffect(() => {
+  //   videoStoppedRef.current = videoStopped;
+  // }, [videoStopped]);
 
   useEffect(() => {
     const interval = setInterval(() => {
+      if (currentTimeRef.current > editedLength.current) {
+        currentTimeRef.current = 0;
+      }
+      if (videoOverRef.current === true) {
+        //TODO: todo to give me form logic
+        currentTimeRef.current = 0;
+        videoOverRef.current = false;
+      }
+
       if (!videoSrc) return;
       if (videoStoppedRef.current) {
         const now = currentTimeRef.current;
@@ -78,7 +106,6 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
       } else {
         // ⏱️ Advance custom time by 100ms
         currentTimeRef.current += 0.1;
-        currentTimeRef.current = Math.round(currentTimeRef.current * 10) / 10;
         const now = currentTimeRef.current;
 
         // 🎯 Find active segment using latest metaData
@@ -90,7 +117,7 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
         if (activeSegment?.isQuestionCard && activeSegment.questionCardData) {
           if (videoRef.current && isPlayingRef.current) {
             videoRef.current.pause();
-            setIsPlaying(false);
+            // setIsPlaying(false);
             isPlayingRef.current = false;
           }
           setCurrentQuestionCard(activeSegment.questionCardData);
@@ -99,7 +126,7 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
 
           if (videoRef.current && !isPlayingRef.current) {
             videoRef.current.play();
-            setIsPlaying(true);
+            // setIsPlaying(true);
             isPlayingRef.current = true;
           }
         }
@@ -110,13 +137,36 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
   }, [videoSrc]);
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    console.log("Handle drop video called!")
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     if (file && file.type.startsWith("video/")) {
+      // Revoke previous object URL if it exists
+      if (videoSrc) {
+        URL.revokeObjectURL(videoSrc);
+      }
+
+      // Store new file reference
+      videoFileRef.current = file;
+
+      // Create new object URL
       const url = URL.createObjectURL(file);
       setVideoSrc(url);
+
+      videoDroppedRef.current = true;
+    } else {
+      videoDroppedRef.current = false;
     }
   };
+
+  // Unmounts
+  useEffect(() => {
+    return () => {
+      if (videoSrc) {
+        URL.revokeObjectURL(videoSrc);
+      }
+    };
+  }, [videoSrc]);
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -124,39 +174,42 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
 
   const togglePlay = () => {
     const now = currentTimeRef.current;
-
+    console.log(isPlayingRef, "ISPLAYING??");
     const activeSegment = metaData.find((seg) => {
       const [start, end] = seg.source;
       return now >= start && now < end;
     });
 
     if (activeSegment?.isQuestionCard && activeSegment.questionCardData) {
+      console.log("YES");
       if (videoRef.current) {
         videoRef.current.pause();
-        setIsPlaying(false);
+        isPlayingRef.current = false;
+        // setIsPlaying(false);
       }
 
       if (!currentQuestionCard) {
         setCurrentQuestionCard(activeSegment.questionCardData);
       }
 
-      setVideoStopped(!videoStopped);
+      videoStoppedRef.current = !videoStoppedRef.current;
+      return;
     } else {
       if (currentQuestionCard) {
         setCurrentQuestionCard(null);
       }
 
       if (videoRef.current) {
-        if (isPlaying) {
+        if (isPlayingRef.current) {
           videoRef.current.pause();
         } else {
           videoRef.current.play();
         }
-        setIsPlaying(!isPlaying);
+        isPlayingRef.current = !isPlayingRef.current;
+        // setIsPlaying(!isPlaying);
       }
+      videoStoppedRef.current = !videoStoppedRef.current;
     }
-
-    setVideoStopped(!videoStopped);
   };
 
   // ⏯️ Listen for spacebar key to toggle play/pause
@@ -170,7 +223,7 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isPlaying, videoStopped]);
+  }, [metaData]);
 
   const getRealVideoTimeFromEditedTime = (
     editedTime: number,
@@ -193,37 +246,37 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
     return editedTime - offset;
   };
 
+  // useEffect(() => {
+  //   if (videoRef.current && editedLength > 0) {
+  //     const targetTime = videoTime;
+  //     videoRef.current.currentTime = getRealVideoTimeFromEditedTime(
+  //       targetTime,
+  //       metaData,
+  //     );
+  //     currentTimeRef.current = targetTime;
+
+  //     // 🧠 Determine active segment based on time
+  //     const activeSegment = metaData.find((seg) => {
+  //       const [start, end] = seg.source;
+  //       return targetTime >= start && targetTime < end;
+  //     });
+
+  //     if (activeSegment?.isQuestionCard && activeSegment.questionCardData) {
+  //       setCurrentQuestionCard(activeSegment.questionCardData);
+  //     } else {
+  //       setCurrentQuestionCard(null);
+  //     }
+  //   }
+  // }, [videoTime, setCurrentQuestionCard]);
+
   useEffect(() => {
-    if (videoRef.current && editedLength > 0) {
+    if (videoRef.current && editedLength.current > 0) {
       const targetTime = videoTime;
+      currentTimeRef.current = targetTime;
       videoRef.current.currentTime = getRealVideoTimeFromEditedTime(
         targetTime,
         metaData,
       );
-      currentTimeRef.current = targetTime;
-
-      // 🧠 Determine active segment based on time
-      const activeSegment = metaData.find((seg) => {
-        const [start, end] = seg.source;
-        return targetTime >= start && targetTime < end;
-      });
-
-      if (activeSegment?.isQuestionCard && activeSegment.questionCardData) {
-        setCurrentQuestionCard(activeSegment.questionCardData);
-      } else {
-        setCurrentQuestionCard(null);
-      }
-    }
-  }, [videoTime, setCurrentQuestionCard]);
-
-  useEffect(() => {
-    if (videoRef.current && editedLength > 0) {
-      const targetTime = videoTime;
-      videoRef.current.currentTime = getRealVideoTimeFromEditedTime(
-        targetTime,
-        metaData,
-      );
-      currentTimeRef.current = targetTime;
 
       // 🧠 Determine active segment based on time
       const activeSegment = metaData.find((seg) => {
@@ -241,20 +294,69 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
 
   const handleLoadedMetadata = () => {
     if (videoRef.current) {
+      console.log("HI DOPPRED setting state");
       setVideoDuration(videoRef.current.duration);
     }
   };
 
   const handleEnded = () => {
-    setIsPlaying(false);
-    setVideoStopped(true); // ✅ Video has finished
+    isPlayingRef.current = false;
+    // videoStoppedRef.current = true;
+    videoOverRef.current = true;
   };
+
+  const handleMouseUp = async () => {
+    if (draggedItem?.type === "edited-video") {
+      console.log("Found edited-video");
+
+      const id = draggedItem.data.id;
+      console.log("the id is", id);
+
+      // ✅ Use IndexedDB instead of localStorage
+      const result = await getVideoById(id);
+      if (!result) {
+        console.warn("No video found in IndexedDB with ID:", id);
+        return;
+      }
+
+      const { metadata, file } = result;
+      const { questionCards: storedSegments, videoLength: storedDuration } = metadata;
+
+      // Merge with current state
+      setVideoSegments(storedSegments);
+
+      // 3) Set video length
+      editedLength.current = storedDuration;
+
+      // 4) Compute width
+      const calculatedWidth = editedLength.current * PIXELS_PER_SECOND;
+
+      // 5) Call passed-in function to update widths
+      updateWidths(calculatedWidth, (calculatedWidth * 50) / 100);
+
+      // 6) Set unique ID
+      currentUniqueID.current = id;
+
+      // 7) Set video source from stored file
+      const url = URL.createObjectURL(file);
+      setVideoSrc(url);
+
+      // 8) Reset video timer
+      currentTimeRef.current = 0;
+      videoFileRef.current = file; 
+    }
+  };
+
+  useEffect(() => {
+    console.log("Received videoSrc in VideoDisplay:", videoSrc);
+  }, [videoSrc]);
 
   return (
     <div className="video-display-wrapper">
       <div
         className="video-display-container"
         onDrop={handleDrop}
+        onMouseUp={handleMouseUp}
         onDragOver={handleDragOver}
       >
         {!videoSrc ? (

@@ -5,7 +5,7 @@ interface VideoSegmentProps {
   source: [number, number]; // [start, end] in seconds
   index: number;
   multiplier: number;
-  videoDuration: number;
+  videoDurationRef: React.RefObject<number>;
   innerBarWidthPx: number;
   setVideoPercent: (percent: number) => void;
   splitAndAdd: (
@@ -17,7 +17,6 @@ interface VideoSegmentProps {
       difficulty: "easy" | "medium" | "hard";
       type: "slider" | "short" | "mc" | "match" | "rank" | "ai";
     },
-    defaultLength: number,
     index: number,
   ) => void;
 }
@@ -25,7 +24,7 @@ interface VideoSegmentProps {
 const VideoSegment: React.FC<VideoSegmentProps> = ({
   source,
   multiplier,
-  videoDuration,
+  videoDurationRef,
   setVideoPercent,
   splitAndAdd,
   index,
@@ -51,6 +50,8 @@ const VideoSegment: React.FC<VideoSegmentProps> = ({
   const { draggedItem } = useMouse();
 
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (e.button !== 0) return;
 
     const rect = segmentRef.current?.getBoundingClientRect();
@@ -59,12 +60,14 @@ const VideoSegment: React.FC<VideoSegmentProps> = ({
     const offsetX = e.clientX - rect.left;
     const ratio = offsetX / rect.width;
     const seconds = start + (end - start) * ratio;
-    const percent = (seconds / videoDuration) * 100;
 
-    setVideoPercent(percent);
+    const time = Math.min(Math.max(seconds, 0), videoDurationRef.current);
+    setVideoPercent(time - Math.random() * 1e-6); // tiny nudge
   };
 
   const handleMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    // e.stopPropagation();
     if (!draggedItem || draggedItem.type !== "question-card") return;
     const rect = segmentRef.current?.getBoundingClientRect();
     if (!rect) return;
@@ -73,7 +76,7 @@ const VideoSegment: React.FC<VideoSegmentProps> = ({
     const ratio = offsetX / rect.width;
     const seconds = start + (end - start) * ratio;
 
-    splitAndAdd(source, seconds, draggedItem.data, 5, index);
+    splitAndAdd(source, seconds, draggedItem.data, index);
   };
 
   const handleMouseEnter = () => {

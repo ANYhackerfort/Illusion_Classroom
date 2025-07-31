@@ -9,10 +9,7 @@ interface VideoCardProps {
   lastAccessed: string;
 }
 
-const VideoCard: React.FC<VideoCardProps> = ({
-  thumbnail,
-  title,
-}) => {
+const VideoCard: React.FC<VideoCardProps> = ({ thumbnail, title }) => {
   return (
     <div className="video-card-wrapper">
       <div className="video-card">

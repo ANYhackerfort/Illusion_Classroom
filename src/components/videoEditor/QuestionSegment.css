@@ -4,7 +4,7 @@
   width: 6px;
   height: 100%;
   background: transparent;
-  z-index: 45;
+  z-index: 200;
 }
 
 .resize-edge.left {

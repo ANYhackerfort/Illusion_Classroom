@@ -46,7 +46,7 @@
   width: 100%;
 
   /* Scrollbar styling */
-  scrollbar-width: thin; /* Firefox */
+  scrollbar-width: auto; /* Firefox */
   scrollbar-color: #686868 transparent; /* optional: color for track/thumb */
 }
 
@@ -160,6 +160,8 @@
   cursor: ew-resize;
   border-radius: 2px;
   z-index: 2;
+
+  pointer-events: none;
 }
 
 .zoom-label {

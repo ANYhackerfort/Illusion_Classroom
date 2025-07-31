@@ -23,7 +23,7 @@ const MouseContext = createContext<MouseContextType | undefined>(undefined);
 export const MouseProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const positionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+  // const positionRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const [isMouseDown, setIsMouseDown] = useState(false);
   const [draggedItem, setDraggedItem] = useState<DraggedItem | null>(null);
   const [draggedItemSizePercent] = useState(100);
@@ -31,25 +31,27 @@ export const MouseProvider: React.FC<{ children: ReactNode }> = ({
   const handlerMap = useRef<Map<string, () => void>>(new Map());
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      positionRef.current = { x: e.clientX, y: e.clientY };
-    };
+    // const handleMouseMove = (e: MouseEvent) => {
+    //   positionRef.current = { x: e.clientX, y: e.clientY };
+    // };
     const handleMouseDown = () => setIsMouseDown(true);
     const handleMouseUp = () => {
       setIsMouseDown(false);
+      console.log("HELLO")
+      console.log(draggedItem)
       setDraggedItem(null);
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
+    // window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("mousedown", handleMouseDown);
     window.addEventListener("mouseup", handleMouseUp);
 
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
+      // window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("mousedown", handleMouseDown);
       window.removeEventListener("mouseup", handleMouseUp);
     };
-  }, []);
+  }, [draggedItem]);
 
   // Apply scaling when hovering over targets
   // useEffect(() => {

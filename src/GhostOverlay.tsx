@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import GhostCard from "./components/quesitons/QuestionCardGhost";
+import GhostEditedVideoCard from "./finder/editedVideoStorage/GhostEditedVideoCard";
 import { useMouse } from "./hooks/drag/MouseContext";
 
 const GhostOverlay = () => {
@@ -7,25 +8,55 @@ const GhostOverlay = () => {
   const ghostRef = useRef<HTMLDivElement>(null);
   const positionRef = useRef({ x: 0, y: 0 });
 
-  // Track mouse position with useRef
+  // Track mouse position
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
+    const updateGhostPosition = (e: MouseEvent) => {
       positionRef.current = { x: e.clientX, y: e.clientY };
-
       const ghost = ghostRef.current;
       if (ghost && draggedItem) {
         const scale = draggedItemSizePercent / 100;
-        ghost.style.transform = `translate(${e.clientX - 100 * scale}px, ${
-          e.clientY - 50 * scale
-        }px) scale(${scale})`;
+        let x = e.clientX;
+        let y = e.clientY;
+
+        if (draggedItem.type === "question-card" && ghost.offsetWidth && ghost.offsetHeight) {
+          x -= (ghost.offsetWidth * scale) / 2;
+          y -= (ghost.offsetHeight * scale) / 2;
+        } else {
+          console.log("Hello")
+          y -= 65; // ✅ Move right
+          x -= 95;
+        }
+
+        ghost.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
       }
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mousedown", updateGhostPosition);
+    window.addEventListener("mousemove", updateGhostPosition);
+
+    return () => {
+      window.removeEventListener("mousedown", updateGhostPosition);
+      window.removeEventListener("mousemove", updateGhostPosition);
+    };
   }, [draggedItem, draggedItemSizePercent]);
 
   if (!draggedItem) return null;
+
+  let ghostContent = null;
+
+  if (draggedItem.type === "question-card") {
+    ghostContent = <GhostCard item={draggedItem} />;
+  } else if (draggedItem.type === "edited-video") {
+    const { id, videoName, videoTags, thumbnailUrl } = draggedItem.data;
+    ghostContent = (
+      <GhostEditedVideoCard
+        id={id}
+        videoName={videoName}
+        videoTags={videoTags}
+        thumbnailUrl={thumbnailUrl}
+      />
+    );
+  }
 
   return (
     <div className="ghost-overlay">
@@ -38,7 +69,7 @@ const GhostOverlay = () => {
           zIndex: 9999,
         }}
       >
-        <GhostCard item={draggedItem} />
+        {ghostContent}
       </div>
     </div>
   );
