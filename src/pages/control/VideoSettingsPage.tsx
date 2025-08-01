@@ -1,76 +1,35 @@
-import React, { useState } from "react";
-import VideoCarousel from "../../components/video/VideoCarousel";
-import VideoDrop from "../../components/video/VideoDrop";
-import "./VideoSettingsPage.css";
+import React from "react";
+import VideoStatus from "../../components/videoDisplayer/DisplayWithBar";
+import "./vsp.css";
 
 const VideoSettingsPage: React.FC = () => {
-  const [videos, setVideos] = useState<File[]>([]);
-  const [thumbnails, setThumbnails] = useState<(string | undefined)[]>([]);
-
-  const handleSelect = async (file: File, index: number) => {
-    const newVideos = [...videos];
-    newVideos[index] = file;
-    setVideos(newVideos);
-
-    const thumb = await getThumbnail(file);
-    const newThumbs = [...thumbnails];
-    newThumbs[index] = thumb;
-    setThumbnails(newThumbs);
-  };
-
-  const getThumbnail = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const video = document.createElement("video");
-      video.src = URL.createObjectURL(file);
-      video.muted = true;
-      video.playsInline = true;
-
-      video.onloadedmetadata = () => {
-        video.currentTime = 0.1;
-      };
-
-      video.onseeked = () => {
-        const canvas = document.createElement("canvas");
-        canvas.width = 160;
-        canvas.height = 90;
-        const ctx = canvas.getContext("2d");
-        ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL());
-      };
-
-      video.onerror = () => {
-        reject("Failed to load video");
-      };
-    });
-  };
 
   return (
     <div className="video-settings-page">
       <h1 className="main-title">Video Control Page</h1>
 
       <div className="settings-row">
-        <h2 className="settings-title">Video Carousel</h2>
-        <p className="settings-description">
-          Drag videos into the boxes in the order you want them to be played.
-        </p>
-        <VideoCarousel>
-          {[...videos, undefined].map((_, index) => (
-            <VideoDrop
-              key={index}
-              onFileSelect={(file) => handleSelect(file, index)}
-              thumbnail={thumbnails[index]}
-            />
-          ))}
-        </VideoCarousel>
+        <div className="settings-title">Video Status</div>
+          <ul className="settings-description">
+            <li>
+              After you <strong>drag in the edited video</strong>, you can <strong>pause and play</strong> it using the <strong>space bar</strong> or by simply <strong>clicking on the video</strong>. 
+              You can also <strong>click on the timeline</strong> to jump to a specific spot and use the <strong>zoom feature</strong> for more precise selection.
+            </li>
+            <li>
+              You can <strong>replace the video</strong>, but you <strong>cannot stack</strong> videos on top of one another. 
+              <strong>Whatever is displayed here will also be shown in the meeting room.</strong>
+            </li>
+          </ul>
+        <VideoStatus />
       </div>
 
       <div className="settings-row">
-        <h2 className="settings-title">Advanced Video Control</h2>
-        <p className="settings-description">
-          Adjust volume, speed, enable subtitles or filters, and try out AI
-          Assistance.
-        </p>
-
+      <h2 className="settings-title">Advanced Video Control</h2>
+      <ul className="settings-description">
+        <li>
+          Adjust <strong>volume</strong>, <strong>speed</strong>, enable <strong>subtitles</strong> or <strong>filters</strong>, and try out <strong>AI Assist</strong> for enhanced playback.
+        </li>
+      </ul>
         <div className="control-panel-container">
           <div className="control-panel">
             <div className="control-item">

@@ -2,34 +2,38 @@ import React from "react";
 import "./QuestionCard.css";
 import { FaMicrophone } from "react-icons/fa";
 import { useMouse } from "../../hooks/drag/MouseContext";
+import type { QuestionCardData } from "../../types/QuestionCard";
 
-interface QuestionCardProps {
-  question: string;
-  answers: string[];
-  difficulty: "easy" | "medium" | "hard";
-  type: "slider" | "short" | "mc" | "match" | "rank" | "ai";
-}
-
-const QuestionCard: React.FC<QuestionCardProps> = ({
+const QuestionCard: React.FC<QuestionCardData> = ({
+  id,
   question,
   answers,
   difficulty,
   type,
+  displayType,
+  showWinner,
+  live,
 }) => {
   const { setDraggedItem } = useMouse();
 
   const handleMouseDown = () => {
     setDraggedItem({
       type: "question-card",
-      data: { question, answers, difficulty, type },
+      data: {
+        id,
+        question,
+        answers,
+        difficulty,
+        type,
+        displayType: displayType ?? "anonymous",
+        showWinner: showWinner ?? false,
+        live: live ?? false,
+      },
     });
   };
 
   return (
-    <div
-      className={`question-card ${difficulty}`}
-      onMouseDown={handleMouseDown}
-    >
+    <div className={`question-card ${difficulty}`} onMouseDown={handleMouseDown}>
       <div className="question-header">
         <div className="question-text">{question}</div>
         <div className={`question-type ${type}`}>{type}</div>
@@ -70,6 +74,11 @@ const QuestionCard: React.FC<QuestionCardProps> = ({
           ))
         )}
       </div>
+      <div className="question-footer">
+  <span className="footer-badge">{displayType ?? "anonymous"}</span>
+  {showWinner && <span className="footer-badge">🏆 Winner</span>}
+  {live && <span className="footer-badge">🔴 Live</span>}
+</div>
     </div>
   );
 };

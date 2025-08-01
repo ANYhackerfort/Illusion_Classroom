@@ -182,3 +182,22 @@
     box-shadow: 0 0 0 0 rgba(255, 110, 196, 0);
   }
 }
+
+.question-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 12px;
+  padding-right: 10px;
+  font-size: 12px;
+  color: #333;
+}
+
+.footer-badge {
+  background-color: rgba(0, 0, 0, 0.08);
+  color: #333;
+  border-radius: 10px;
+  padding: 2px 8px;
+  font-weight: 500;
+  text-transform: capitalize;
+}

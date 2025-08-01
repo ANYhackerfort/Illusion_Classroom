@@ -1,43 +1,32 @@
 import React, { useRef, useState, useEffect } from "react";
-import SegmentMenu from "./SegmentMenus";
-import "./VideoBar.css";
-import "./QuestionSegment.css";
+import "./DisplayBar.css";
+import "./Question.css";
+
 import type { QuestionCardData } from "../../types/QuestionCard";
 
 
-interface QuestionSegmentProps {
+interface QuestionDudProps {
+  index: number;
   source: [number, number];
   multiplier: number;
   videoDurationRef: React.RefObject<number>;
   questionCardData: QuestionCardData;
   setVideoPercent: (p: number) => void;
-  updateSegment: (index: number, newEnd: number) => void;
-  onDelete: (index: number) => void;
-  index: number;
 }
 
-const QuestionSegment: React.FC<QuestionSegmentProps> = ({
-  index,
+const QuestionDud: React.FC<QuestionDudProps> = ({
   source,
   multiplier,
   videoDurationRef,
   questionCardData,
   setVideoPercent,
-  updateSegment,
-  onDelete,
 }) => {
   const [start, setStart] = useState(source[0]);
   const [end, setEnd] = useState(source[1]);
   const [wPx, setWPx] = useState(0);
   const [lPx, setLPx] = useState(0);
-  const [isDraggingSide, setIsDraggingSide] = useState(false);
-  const [showMenu, setShowMenu] = useState(false);
-  const [menuX, setMenuX] = useState(0);
-  const [menuY, setMenuY] = useState(0);
 
   const segmentRef = useRef<HTMLDivElement>(null);
-  const mouseDownLocation = useRef(0);
-  const originalEndRef = useRef(end);
 
   useEffect(() => {
     setStart(source[0]);
@@ -65,56 +54,7 @@ const QuestionSegment: React.FC<QuestionSegmentProps> = ({
         videoDurationRef.current ?? 0,
       );
       setVideoPercent(time - Math.random() * 1e-6);
-      setShowMenu(false);
-    } else if (e.button === 2) {
-      e.preventDefault();
-      setMenuX(e.clientX);
-      setMenuY(e.clientY);
-      setShowMenu(true);
     }
-  };
-
-  const handleMouseDownResize = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.button === 0) {
-      e.preventDefault();
-      e.stopPropagation();
-      setIsDraggingSide(true);
-      mouseDownLocation.current = e.clientX;
-      originalEndRef.current = end;
-    }
-  };
-
-  useEffect(() => {
-    if (!isDraggingSide) return;
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const dx = e.clientX - mouseDownLocation.current;
-      const deltaSeconds = dx / (100 * multiplier);
-      const newEnd = Math.max(
-        originalEndRef.current + deltaSeconds,
-        start + 0.1,
-      );
-      updateSegment(index, newEnd);
-    };
-
-    const handleMouseUp = (e: MouseEvent) => {
-      e.stopPropagation();
-      e.preventDefault();
-      setIsDraggingSide(false);
-    };
-
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
-
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [isDraggingSide, start, multiplier, index, updateSegment]);
-
-  const handleDelete = () => {
-    setShowMenu(false);
-    onDelete(index);
   };
 
   return (
@@ -142,10 +82,6 @@ const QuestionSegment: React.FC<QuestionSegmentProps> = ({
           gap: "4px",
         }}
       >
-        <div
-          className="resize-edge right"
-          onMouseDown={handleMouseDownResize}
-        />
 
         {[
           {
@@ -185,17 +121,8 @@ const QuestionSegment: React.FC<QuestionSegmentProps> = ({
           </div>
         ))}
       </div>
-
-      {showMenu && (
-        <SegmentMenu
-          x={menuX}
-          y={menuY}
-          onDelete={handleDelete}
-          onClose={() => setShowMenu(false)} // ✅ closes menu on exit
-        />
-      )}
     </>
   );
 };
 
-export default QuestionSegment;
+export default QuestionDud;

@@ -107,3 +107,22 @@
   font-size: 16px;
   color: #333;
 }
+
+.video-question-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 20px;
+  padding-right: 12px;
+  font-size: 12px;
+  color: #333;
+}
+
+.footer-badge {
+  background-color: #eeeeee; /* ← visible background */
+  color: #000; /* ← visible text */
+  border-radius: 12px;
+  padding: 4px 10px;
+  font-weight: 500;
+  text-transform: capitalize;
+}

@@ -6,8 +6,8 @@ import "./TaskBar.css";
 
 const VideoIcon = (
   <svg
-    width="25"
-    height="25"
+    width="20"
+    height="20"
     viewBox="0 0 24 24"
     fill="white"
     xmlns="http://www.w3.org/2000/svg"
@@ -40,7 +40,7 @@ const BotIcon = (
   </svg>
 );
 
-const QuestionIcon = (
+const EditIcon = (
   <svg
     width="20"
     height="20"
@@ -48,10 +48,9 @@ const QuestionIcon = (
     fill="white"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path d="M11 18H13V20H11V18ZM12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 19C8.13 19 5 15.87 5 12C5 8.13 8.13 5 12 5C15.87 5 19 8.13 19 12C19 15.87 15.87 19 12 19ZM12 7C10.34 7 9 8.34 9 10H11C11 9.45 11.45 9 12 9C12.55 9 13 9.45 13 10C13 11 11 10.75 11 13H13C13 11.75 15 11.5 15 10C15 8.34 13.66 7 12 7Z" />
+    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM21.41 6.34c.39-.39.39-1.02 0-1.41L19.07 2.59c-.39-.39-1.02-.39-1.41 0L15.13 5.12l3.75 3.75 2.53-2.53z" />
   </svg>
 );
-
 const MeetingIcon = (
   <svg
     width="20"
@@ -112,6 +111,18 @@ const InboxIcon = (
   </svg>
 );
 
+const QuestionIcon = (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="white"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M11 18H13V20H11V18ZM12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12 19C8.13 19 5 15.87 5 12C5 8.13 8.13 5 12 5C15.87 5 19 8.13 19 12C19 15.87 15.87 19 12 19ZM12 7C10.34 7 9 8.34 9 10H11C11 9.45 11.45 9 12 9C12.55 9 13 9.45 13 10C13 11 11 10.75 11 13H13C13 11.75 15 11.5 15 10C15 8.34 13.66 7 12 7Z" />
+  </svg>
+);
+
 const InviteIcon = (
   <svg width="20" height="20" fill="white" viewBox="0 0 24 24">
     <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4S8 5.79 8 8s1.79 4 4 4zm6 2h-2.2c-.73 0-1.37.4-1.72 1.03C13.23 16.1 12.14 16.5 11 16.5s-2.23-.4-3.08-1.47A2.003 2.003 0 006.2 14H4v2h16v-2z" />
@@ -169,20 +180,29 @@ const LeftTaskBar: React.FC<LeftTaskBarProps> = ({ onSelect }) => {
 
       <div className="section-label">Control</div>
 
-      <div className="taskbar-buttons-group">
-        <TaskBarButton
-          icon={VideoIcon}
-          label="Video"
-          onClick={() => onSelect(0)}
-        />
-        <TaskBarButton
-          icon={QuestionIcon}
-          label="Question"
-          onClick={() => onSelect(1)}
-        />
-        <TaskBarButton icon={BotIcon} label="Bot" onClick={() => onSelect(2)} />
-      </div>
-
+    <div className="taskbar-buttons-group">
+      <TaskBarButton
+        icon={VideoIcon}
+        label="Video Control"
+        onClick={() => onSelect(0)}
+      />
+      <TaskBarButton
+        icon={EditIcon}
+        label="Video Editor"
+        onClick={() => onSelect(1)}
+      />
+      
+      <TaskBarButton
+        icon={QuestionIcon}
+        label="Question Control"
+        onClick={() => onSelect(3)}
+      />
+      <TaskBarButton
+        icon={BotIcon}
+        label="Bot"
+        onClick={() => onSelect(2)}
+      />
+    </div>
       <div className="section-label">Data</div>
       <div className="taskbar-buttons-group">
         <TaskBarButton

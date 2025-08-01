@@ -8,12 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 import { saveVideoToIndexedDB, getVideoById } from "../../indexDB/videoStorage";
 import type { VideoMetadata } from "../../indexDB/videoStorage";
 
-interface QuestionCardData {
-  question: string;
-  answers: string[];
-  difficulty: "easy" | "medium" | "hard";
-  type: "slider" | "short" | "mc" | "match" | "rank" | "ai";
-}
+import type { QuestionCardData } from "../../types/QuestionCard";
 
 interface VideoSegmentData {
   source: [number, number];
@@ -34,6 +29,7 @@ const VideoPlayerWithBar: React.FC = () => {
   const [baseWidth, setBaseWidth] = useState(0);
   const [innerBarWidthPx, setInnerBarWidthPx] = useState(0);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
+  const [widthPercent, setWidthPercent] = useState(50);
 
   const videoDroppedInRef = useRef(false);
 
@@ -218,6 +214,7 @@ const VideoPlayerWithBar: React.FC = () => {
           videoDroppedRef={videoDroppedInRef}
           setVideoSegments={setVideoSegments}
           updateWidths={handleUpdateWidth}
+          setWidthPercent={setWidthPercent}
         />
 
         {currentQuestionCard && (
@@ -236,6 +233,9 @@ const VideoPlayerWithBar: React.FC = () => {
               answers={currentQuestionCard.answers}
               difficulty={currentQuestionCard.difficulty}
               type={currentQuestionCard.type}
+              displayType={currentQuestionCard.displayType}
+              showWinner={currentQuestionCard.showWinner}
+              live={currentQuestionCard.live}
             />
           </div>
         )}
@@ -252,6 +252,8 @@ const VideoPlayerWithBar: React.FC = () => {
         innerBarWidthPx={innerBarWidthPx}
         setInnerBarWidthPx={setInnerBarWidthPx}
         setBaseWidth={setBaseWidth}
+        widthPercent={widthPercent}
+        setWidthPercent={setWidthPercent}
       />
 
       {videoDuration !== 0 && <SaveButton onSave={handleVideoSave} />}

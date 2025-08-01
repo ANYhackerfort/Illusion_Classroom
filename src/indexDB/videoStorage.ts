@@ -1,11 +1,6 @@
 // src/utils/videoStorage.ts
 
-export interface QuestionCardData {
-  question: string;
-  answers: string[];
-  difficulty: "easy" | "medium" | "hard";
-  type: "slider" | "short" | "mc" | "match" | "rank" | "ai";
-}
+import type { QuestionCardData } from "../types/QuestionCard";
 
 export interface VideoSegmentData {
   source: [number, number];

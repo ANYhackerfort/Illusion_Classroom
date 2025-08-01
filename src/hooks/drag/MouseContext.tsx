@@ -37,8 +37,6 @@ export const MouseProvider: React.FC<{ children: ReactNode }> = ({
     const handleMouseDown = () => setIsMouseDown(true);
     const handleMouseUp = () => {
       setIsMouseDown(false);
-      console.log("HELLO")
-      console.log(draggedItem)
       setDraggedItem(null);
     };
 

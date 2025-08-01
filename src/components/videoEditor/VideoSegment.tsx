@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { useMouse } from "../../hooks/drag/MouseContext";
+import type { QuestionCardData } from "../../types/QuestionCard";
 
 interface VideoSegmentProps {
   source: [number, number]; // [start, end] in seconds
@@ -11,12 +12,7 @@ interface VideoSegmentProps {
   splitAndAdd: (
     source: [number, number],
     time: number,
-    questionCardData: {
-      question: string;
-      answers: string[];
-      difficulty: "easy" | "medium" | "hard";
-      type: "slider" | "short" | "mc" | "match" | "rank" | "ai";
-    },
+    questionCardData: QuestionCardData,
     index: number,
   ) => void;
 }

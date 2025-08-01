@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import "./VideoCard.css";
 import { FaMicrophone } from "react-icons/fa";
 import { useMouse } from "../../hooks/drag/MouseContext";
@@ -8,6 +8,9 @@ interface QuestionCardProps {
   answers: string[];
   difficulty: "easy" | "medium" | "hard";
   type: "slider" | "short" | "mc" | "match" | "rank" | "ai";
+  displayType: "face" | "initial" | "anonymous" | undefined;
+  showWinner: boolean | undefined;
+  live: boolean | undefined;
 }
 
 const VideoQuestionCard: React.FC<QuestionCardProps> = ({
@@ -15,14 +18,24 @@ const VideoQuestionCard: React.FC<QuestionCardProps> = ({
   answers,
   difficulty,
   type,
+  displayType,
+  showWinner,
+  live,
 }) => {
   const { setDraggedItem } = useMouse();
+
+  const [displayTypeState] = useState<"face" | "initial" | "anonymous">(
+  displayType ?? "anonymous"
+  );
+  const [showWinnerState] = useState<boolean>(showWinner ?? false);
+  const [liveState] = useState<boolean>(live ?? false);
 
   const handleMouseDown = () => {
     setDraggedItem({
       type: "question-card",
       data: { question, answers, difficulty, type },
     });
+    console.log(displayTypeState)
   };
 
   return (
@@ -71,6 +84,12 @@ const VideoQuestionCard: React.FC<QuestionCardProps> = ({
             </div>
           ))
         )}
+      </div>
+
+      <div className="video-question-footer">
+        <span className="footer-badge">{displayTypeState}</span>
+        {showWinnerState && <span className="footer-badge">🏆 Winner</span>}
+        {liveState && <span className="footer-badge">🔴 Live</span>}
       </div>
     </div>
   );

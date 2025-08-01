@@ -11,11 +11,10 @@ interface VideoSegmentData {
   questionCardData?: QuestionCardData;
 }
 
-interface VideoDisplayProps {
+interface DisplayProps {
   videoTime: number;
   editedLength: React.RefObject<number>;
   setVideoStopped: (stopped: boolean) => void;
-  setVideoDuration: (duration: number) => void;
   metaData: VideoSegmentData[];
   videoStopped: boolean;
   currentQuestionCard: QuestionCardData | null;
@@ -25,15 +24,13 @@ interface VideoDisplayProps {
   videoFileRef: React.RefObject<File | null>;
   videoSrc: string | null;
   setVideoSrc: (videoSrc: string | null) => void;
-  videoDroppedRef: React.RefObject<boolean>;
   setVideoSegments: (segments: VideoSegmentData[]) => void;
   updateWidths: (base: number, inner: number) => void;
-  setWidthPercent: (widthPercent: number) => void; 
+  setWidthPercent: (width: number) => void;
 }
 
-const VideoDisplay: React.FC<VideoDisplayProps> = ({
+const Display: React.FC<DisplayProps> = ({
   videoTime,
-  setVideoDuration,
   editedLength,
   metaData,
   currentQuestionCard,
@@ -43,7 +40,6 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
   videoFileRef,
   videoSrc,
   setVideoSrc,
-  videoDroppedRef,
   setVideoSegments,
   updateWidths,
   setWidthPercent,
@@ -133,29 +129,6 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
     return () => clearInterval(interval);
   }, [videoSrc]);
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    console.log("Handle drop video called!")
-    e.preventDefault();
-    const file = e.dataTransfer.files[0];
-    if (file && file.type.startsWith("video/")) {
-      // Revoke previous object URL if it exists
-      if (videoSrc) {
-        URL.revokeObjectURL(videoSrc);
-      }
-
-      // Store new file reference
-      videoFileRef.current = file;
-
-      // Create new object URL
-      const url = URL.createObjectURL(file);
-      setVideoSrc(url);
-
-      videoDroppedRef.current = true;
-    } else {
-      videoDroppedRef.current = false;
-    }
-  };
-
   // Unmounts
   useEffect(() => {
     return () => {
@@ -171,14 +144,12 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
 
   const togglePlay = () => {
     const now = currentTimeRef.current;
-    console.log(isPlayingRef, "ISPLAYING??");
     const activeSegment = metaData.find((seg) => {
       const [start, end] = seg.source;
       return now >= start && now < end;
     });
 
     if (activeSegment?.isQuestionCard && activeSegment.questionCardData) {
-      console.log("YES");
       if (videoRef.current) {
         videoRef.current.pause();
         isPlayingRef.current = false;
@@ -289,12 +260,12 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
     }
   }, [videoTime]);
 
-  const handleLoadedMetadata = () => {
-    if (videoRef.current) {
-      console.log("HI DOPPRED setting state");
-      setVideoDuration(videoRef.current.duration);
-    }
-  };
+  // const handleLoadedMetadata = () => {
+  //   if (videoRef.current) {
+  //     console.log("HI DOPPRED setting state");
+  //     setVideoDuration(videoRef.current.duration);
+  //   }
+  // };
 
   const handleEnded = () => {
     isPlayingRef.current = false;
@@ -359,19 +330,17 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
     <div className="video-display-wrapper">
       <div
         className="video-display-container"
-        onDrop={handleDrop}
         onMouseUp={handleMouseUp}
         onDragOver={handleDragOver}
       >
         {!videoSrc ? (
-          <div className="video-drop-zone">Drag a video file here to edit</div>
+          <div className="video-drop-zone">Drag an edited video here to start playing...</div>
         ) : (
           <video
             ref={videoRef}
             src={videoSrc}
             className="video-element"
             onClick={togglePlay}
-            onLoadedMetadata={handleLoadedMetadata}
             onEnded={handleEnded} // ✅ End of video handler
           />
         )}
@@ -380,4 +349,4 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
   );
 };
 
-export default VideoDisplay;
+export default Display;

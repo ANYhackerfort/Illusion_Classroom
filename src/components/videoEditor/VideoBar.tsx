@@ -6,12 +6,7 @@ import VideoSegment from "./VideoSegment";
 import QuestionSegment from "./QuestionSegment";
 import DefaultLengthControl from "./DefaultLengthControl";
 
-interface QuestionCardData {
-  question: string;
-  answers: string[];
-  difficulty: "easy" | "medium" | "hard";
-  type: "slider" | "short" | "mc" | "match" | "rank" | "ai";
-}
+import type { QuestionCardData } from "../../types/QuestionCard";
 
 interface VideoSegmentData {
   source: [number, number];
@@ -31,6 +26,8 @@ interface VideoBarProps {
   setInnerBarWidthPx: (px: number) => void;
   innerBarWidthPx: number;
   setBaseWidth: (width: number) => void;
+  widthPercent: number;
+  setWidthPercent: (width: number) => void;
 }
 
 const VideoBar: React.FC<VideoBarProps> = ({
@@ -43,8 +40,10 @@ const VideoBar: React.FC<VideoBarProps> = ({
   setInnerBarWidthPx,
   innerBarWidthPx,
   setBaseWidth,
+  widthPercent,
+  setWidthPercent,
 }) => {
-  const [widthPercent, setWidthPercent] = useState(50);
+  // const [widthPercent, setWidthPercent] = useState(50);
   const [defaultLength, setDefaultLength] = useState(10);
   const needleRef = useRef<HTMLDivElement>(null);
   const innerBarRef = useRef<HTMLDivElement>(null);
@@ -57,6 +56,10 @@ const VideoBar: React.FC<VideoBarProps> = ({
       (widthPercent / 100) * videoLength.current * PIXELS_PER_SECOND;
     setInnerBarWidthPx(newWidth);
   }, [widthPercent]);
+
+    useEffect(() => {
+      console.log("SFSFSFSFJSOPFIJSOidfjoisj")
+  }, []);
 
   const markers = useMemo(() => {
     const pixelSpacing = 100;
