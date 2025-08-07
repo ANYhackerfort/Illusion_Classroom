@@ -11,8 +11,16 @@ const tagColorMap: Record<string, string> = {};
 function getColorForTag(tag: string): string {
   if (tagColorMap[tag]) return tagColorMap[tag];
   const colors = [
-    "#F44336", "#E91E63", "#9C27B0", "#3F51B5", "#2196F3",
-    "#009688", "#4CAF50", "#FF9800", "#795548", "#607D8B",
+    "#F44336",
+    "#E91E63",
+    "#9C27B0",
+    "#3F51B5",
+    "#2196F3",
+    "#009688",
+    "#4CAF50",
+    "#FF9800",
+    "#795548",
+    "#607D8B",
   ];
   const color = colors[Math.abs(hashCode(tag)) % colors.length];
   tagColorMap[tag] = color;

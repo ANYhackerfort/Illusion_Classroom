@@ -1,15 +1,10 @@
 import React, { useRef, useEffect } from "react";
 import "./VideoDisplay.css";
-import { useMouse } from '../../hooks/drag/MouseContext';
-import { getVideoById } from '../../indexDB/videoStorage';
+import { useMouse } from "../../hooks/drag/MouseContext";
+import { getVideoById } from "../../indexDB/videoStorage";
 
 import type { QuestionCardData } from "../../types/QuestionCard";
-
-interface VideoSegmentData {
-  source: [number, number];
-  isQuestionCard?: boolean;
-  questionCardData?: QuestionCardData;
-}
+import type { VideoSegmentData } from "../../types/QuestionCard";
 
 interface DisplayProps {
   videoTime: number;
@@ -53,6 +48,7 @@ const Display: React.FC<DisplayProps> = ({
   const isPlayingRef = useRef(false); // actaul video
   const videoStoppedRef = useRef(true); // The entirety of video with question cards
   const videoOverRef = useRef(false);
+  const currentTimeDisplayRef = useRef<HTMLDivElement>(null);
 
   const { draggedItem } = useMouse();
 
@@ -72,6 +68,9 @@ const Display: React.FC<DisplayProps> = ({
 
   useEffect(() => {
     const interval = setInterval(() => {
+      if (currentTimeDisplayRef.current) {
+        currentTimeDisplayRef.current.textContent = `${currentTimeRef.current.toFixed(1)}s`;
+      }
       if (currentTimeRef.current > editedLength.current) {
         currentTimeRef.current = 0;
       }
@@ -291,7 +290,8 @@ const Display: React.FC<DisplayProps> = ({
       }
 
       const { metadata, file } = result;
-      const { questionCards: storedSegments, videoLength: storedDuration } = metadata;
+      const { questionCards: storedSegments, videoLength: storedDuration } =
+        metadata;
 
       // Merge with current state
       setVideoSegments(storedSegments);
@@ -314,9 +314,9 @@ const Display: React.FC<DisplayProps> = ({
 
       // 8) Reset video timer
       currentTimeRef.current = 0;
-      videoFileRef.current = file; 
+      videoFileRef.current = file;
 
-      isPlayingRef.current = false; 
+      isPlayingRef.current = false;
 
       setWidthPercent(50);
     }
@@ -334,16 +334,21 @@ const Display: React.FC<DisplayProps> = ({
         onDragOver={handleDragOver}
       >
         {!videoSrc ? (
-          <div className="video-drop-zone">Drag an edited video here to start playing...</div>
+          <div className="video-drop-zone">Drag a video file here to edit</div>
         ) : (
           <video
             ref={videoRef}
             src={videoSrc}
             className="video-element"
             onClick={togglePlay}
-            onEnded={handleEnded} // ✅ End of video handler
+            onEnded={handleEnded}
           />
         )}
+      </div>
+
+      {/* Time Display goes just below the video and aligned to the left */}
+      <div className="video-time-display-wrapper">
+        <div ref={currentTimeDisplayRef} className="video-time-display" />
       </div>
     </div>
   );

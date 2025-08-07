@@ -180,24 +180,24 @@ const Finder: React.FC<FinderProps> = ({ hide, onClose }) => {
             />
           </div>
 
-        <div className="content-area">
-          {selectedIndex === 1 ? (
-            <FolderTable />
-          ) : selectedIndex === 2 ? (
-            <VideoTable />
-          ) : selectedIndex === 3 ? (
-            <QuestionDropZone />
-          ) : (
-            <>
-              <p>
-                Showing contents of: <strong>{currentPath}</strong>
-              </p>
-              <p>
-                Search: <em>{searchQuery || "(none)"}</em>
-              </p>
-            </>
-          )}
-        </div>
+          <div className="content-area">
+            {selectedIndex === 1 ? (
+              <FolderTable />
+            ) : selectedIndex === 2 ? (
+              <VideoTable />
+            ) : selectedIndex === 3 ? (
+              <QuestionDropZone />
+            ) : (
+              <>
+                <p>
+                  Showing contents of: <strong>{currentPath}</strong>
+                </p>
+                <p>
+                  Search: <em>{searchQuery || "(none)"}</em>
+                </p>
+              </>
+            )}
+          </div>
         </div>
       </div>
 

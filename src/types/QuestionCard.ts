@@ -10,3 +10,10 @@ export interface QuestionCardData {
   showWinner?: boolean;
   live?: boolean;
 }
+
+export interface VideoSegmentData {
+  id: string;
+  source: [number, number];
+  isQuestionCard?: boolean;
+  questionCardData?: QuestionCardData;
+}

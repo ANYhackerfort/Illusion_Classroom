@@ -1,9 +1,9 @@
 .video-display-wrapper {
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  align-items: center; /* center the container horizontally */
   width: 100%;
 }
-
 .video-display-container {
   display: inline-block;
   border: none;
@@ -69,4 +69,19 @@
 .video-display-wrapper {
   width: 100%;
   height: 100%;
+}
+
+.video-time-display-wrapper {
+  width: 100%;
+  max-width: 900px; /* match the max-width of video-display-container */
+  padding-left: 0; /* align left with no padding */
+  margin-top: 6px;
+}
+
+.video-time-display {
+  font-size: 12px;
+  font-weight: 500;
+  color: #333;
+  user-select: none;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 }

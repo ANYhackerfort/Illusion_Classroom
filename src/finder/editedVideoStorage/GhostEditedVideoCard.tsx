@@ -27,7 +27,9 @@ const GhostEditedVideoCard: React.FC<GhostEditedVideoCardProps> = ({
           <div className="video-placeholder ghost-thumb">Preview</div>
         )}
       </div>
-      <div className="video-name ghost-text">{videoName || `Video ID: ${id}`}</div>
+      <div className="video-name ghost-text">
+        {videoName || `Video ID: ${id}`}
+      </div>
       <div className="video-tags">
         {videoTags.length > 0 ? (
           videoTags.map((tag, index) => (

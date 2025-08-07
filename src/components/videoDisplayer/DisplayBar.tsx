@@ -4,13 +4,7 @@ import { FaVideo } from "react-icons/fa";
 import { useMemo } from "react";
 import QuestionDud from "./Question";
 import VideoDud from "./Video";
-import type { QuestionCardData } from "../../types/QuestionCard";
-
-interface VideoSegmentData {
-  source: [number, number];
-  isQuestionCard?: boolean;
-  questionCardData?: QuestionCardData;
-}
+import type { VideoSegmentData } from "../../types/QuestionCard";
 
 interface DisplayBarProps {
   setVideoTime: (time: number) => void;
@@ -21,7 +15,7 @@ interface DisplayBarProps {
   setInnerBarWidthPx: (px: number) => void;
   innerBarWidthPx: number;
   setWidthPercent: (width: number) => void;
-  widthPercent: number; 
+  widthPercent: number;
 }
 
 const DisplayBar: React.FC<DisplayBarProps> = ({

@@ -180,29 +180,25 @@ const LeftTaskBar: React.FC<LeftTaskBarProps> = ({ onSelect }) => {
 
       <div className="section-label">Control</div>
 
-    <div className="taskbar-buttons-group">
-      <TaskBarButton
-        icon={VideoIcon}
-        label="Video Control"
-        onClick={() => onSelect(0)}
-      />
-      <TaskBarButton
-        icon={EditIcon}
-        label="Video Editor"
-        onClick={() => onSelect(1)}
-      />
-      
-      <TaskBarButton
-        icon={QuestionIcon}
-        label="Question Control"
-        onClick={() => onSelect(3)}
-      />
-      <TaskBarButton
-        icon={BotIcon}
-        label="Bot"
-        onClick={() => onSelect(2)}
-      />
-    </div>
+      <div className="taskbar-buttons-group">
+        <TaskBarButton
+          icon={VideoIcon}
+          label="Video Control"
+          onClick={() => onSelect(0)}
+        />
+        <TaskBarButton
+          icon={EditIcon}
+          label="Video Editor"
+          onClick={() => onSelect(1)}
+        />
+
+        <TaskBarButton
+          icon={QuestionIcon}
+          label="Question Control"
+          onClick={() => onSelect(3)}
+        />
+        <TaskBarButton icon={BotIcon} label="Bot" onClick={() => onSelect(2)} />
+      </div>
       <div className="section-label">Data</div>
       <div className="taskbar-buttons-group">
         <TaskBarButton

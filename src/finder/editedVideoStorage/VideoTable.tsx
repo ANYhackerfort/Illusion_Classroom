@@ -20,7 +20,9 @@ const VideoTable: React.FC = () => {
     const loadVideos = async () => {
       const allVideos: StoredVideo[] = await getAllVideos();
       allVideos.sort(
-        (a, b) => new Date(a.metadata.savedAt).getTime() - new Date(b.metadata.savedAt).getTime()
+        (a, b) =>
+          new Date(a.metadata.savedAt).getTime() -
+          new Date(b.metadata.savedAt).getTime(),
       );
       const ids = allVideos.map((v) => v.metadata.id);
       setVideoIDs(ids);

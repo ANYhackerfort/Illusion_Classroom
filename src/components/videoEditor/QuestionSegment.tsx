@@ -3,20 +3,23 @@ import SegmentMenu from "./SegmentMenus";
 import "./VideoBar.css";
 import "./QuestionSegment.css";
 import type { QuestionCardData } from "../../types/QuestionCard";
-
+import ShiftDialog from "./ShiftDialogue";
 
 interface QuestionSegmentProps {
+  id: string;
   source: [number, number];
   multiplier: number;
   videoDurationRef: React.RefObject<number>;
   questionCardData: QuestionCardData;
   setVideoPercent: (p: number) => void;
-  updateSegment: (index: number, newEnd: number) => void;
-  onDelete: (index: number) => void;
+  updateSegment: (id: string, newEnd: number) => void;
+  onDelete: (id: string) => void;
+  updateSegmentPositioning: (id: string, left: number) => void;
   index: number;
 }
 
 const QuestionSegment: React.FC<QuestionSegmentProps> = ({
+  id,
   index,
   source,
   multiplier,
@@ -25,6 +28,7 @@ const QuestionSegment: React.FC<QuestionSegmentProps> = ({
   setVideoPercent,
   updateSegment,
   onDelete,
+  updateSegmentPositioning,
 }) => {
   const [start, setStart] = useState(source[0]);
   const [end, setEnd] = useState(source[1]);
@@ -34,6 +38,7 @@ const QuestionSegment: React.FC<QuestionSegmentProps> = ({
   const [showMenu, setShowMenu] = useState(false);
   const [menuX, setMenuX] = useState(0);
   const [menuY, setMenuY] = useState(0);
+  const [DialogOpen, setDialogOpen] = useState(false);
 
   const segmentRef = useRef<HTMLDivElement>(null);
   const mouseDownLocation = useRef(0);
@@ -45,8 +50,8 @@ const QuestionSegment: React.FC<QuestionSegmentProps> = ({
   }, [source]);
 
   useEffect(() => {
-    setWPx((end - start) * 100 * multiplier);
-    setLPx(start * 100 * multiplier);
+    setWPx((end - start) *  multiplier);
+    setLPx(start * multiplier);
   }, [start, end, multiplier]);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -89,12 +94,13 @@ const QuestionSegment: React.FC<QuestionSegmentProps> = ({
 
     const handleMouseMove = (e: MouseEvent) => {
       const dx = e.clientX - mouseDownLocation.current;
-      const deltaSeconds = dx / (100 * multiplier);
+      const deltaSeconds = (dx / multiplier);
+      console.log("ZZZZZZZ", originalEndRef.current, deltaSeconds);
       const newEnd = Math.max(
         originalEndRef.current + deltaSeconds,
         start + 0.1,
       );
-      updateSegment(index, newEnd);
+      updateSegment(id, newEnd);
     };
 
     const handleMouseUp = (e: MouseEvent) => {
@@ -114,7 +120,26 @@ const QuestionSegment: React.FC<QuestionSegmentProps> = ({
 
   const handleDelete = () => {
     setShowMenu(false);
-    onDelete(index);
+    onDelete(id);
+  };
+
+  const handleShift = (left: number, right: number) => {
+    if (left !== start && right !== end) {
+      console.log("Both left and right changed");
+
+      updateSegmentPositioning(id, left - start); // adjust left position
+
+      console.log("THE INDEX IS", index)
+      updateSegment(id, right);
+      // update start and end
+    } else if (left !== start) {
+      console.log("Left changed, right remains the same", left-start);
+      updateSegmentPositioning(id, left-start); // adjust left position
+      // update start
+    } else if (right !== end) {
+      console.log("Right changed, left remains the same");
+      updateSegment(id, right);
+    }
   };
 
   return (
@@ -124,7 +149,6 @@ const QuestionSegment: React.FC<QuestionSegmentProps> = ({
         onMouseDown={handleMouseDown}
         className={`segment question-segment ${questionCardData.difficulty}`}
         onContextMenu={(e) => e.preventDefault()}
-      
         style={{
           position: "absolute",
           width: `${wPx}px`,
@@ -191,7 +215,18 @@ const QuestionSegment: React.FC<QuestionSegmentProps> = ({
           x={menuX}
           y={menuY}
           onDelete={handleDelete}
-          onClose={() => setShowMenu(false)} // ✅ closes menu on exit
+          onClose={() => setShowMenu(false)}
+          setDialogOpen={setDialogOpen}
+        />
+      )}
+
+      {DialogOpen && (
+        <ShiftDialog
+          open={DialogOpen}
+          onClose={() => setDialogOpen(false)}
+          onApply={handleShift}
+          originalLeft={start}
+          originalRight={end}
         />
       )}
     </>

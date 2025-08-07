@@ -9,12 +9,7 @@ import { saveVideoToIndexedDB, getVideoById } from "../../indexDB/videoStorage";
 import type { VideoMetadata } from "../../indexDB/videoStorage";
 
 import type { QuestionCardData } from "../../types/QuestionCard";
-
-interface VideoSegmentData {
-  source: [number, number];
-  isQuestionCard?: boolean;
-  questionCardData?: QuestionCardData;
-}
+import type { VideoSegmentData } from "../../types/QuestionCard";
 
 const VideoPlayerWithBar: React.FC = () => {
   const [videoTime, setVideoTime] = useState(0);
@@ -30,6 +25,7 @@ const VideoPlayerWithBar: React.FC = () => {
   const [innerBarWidthPx, setInnerBarWidthPx] = useState(0);
   const [videoSrc, setVideoSrc] = useState<string | null>(null);
   const [widthPercent, setWidthPercent] = useState(50);
+  const [updateBar, setuUpdateBar] = useState(false);
 
   const videoDroppedInRef = useRef(false);
 
@@ -41,57 +37,86 @@ const VideoPlayerWithBar: React.FC = () => {
   const hasRestoredRef = useRef(false);
 
   useEffect(() => {
-    console.log("Auto Save capabilities mounted.");
+    const id = currentUniqueID.current;
+    const length = videoLength.current;
+    const videoFile = videoFileRef.current;
+    if (!videoFile || videoSegments.length === 0) return;
 
-    return () => {
-      const id = currentUniqueID.current;
-      const length = videoLength.current;
-      const videoFile = videoFileRef.current;
-      const questionCards = extractAllSegments();
-
-      console.log("EXTRACTED QUESTION CARDS", questionCards);
-
-      if (!videoFile) {
-        console.warn("No video file to persist");
-        return;
-      }
-
-      getVideoById(id).then((existing) => {
-        let metadata: VideoMetadata;
-
-        if (existing) {
-          // ✅ Update only the questionCards
-          metadata = {
-            ...existing.metadata,
-            questionCards,
-            savedAt: new Date().toISOString(), // optionally update timestamp
-          };
-          console.log("🔁 Updating existing video metadata only");
-        } else {
-          // ✅ New entry
-          metadata = {
-            id,
-            videoName: "Unsaved",
-            videoTags: [],
-            videoLength: length,
-            questionCards,
-            savedAt: new Date().toISOString(),
-          };
-          console.log("🆕 Saving new video entry");
-        }
-
-        saveVideoToIndexedDB(metadata, videoFile).then(() => {
-          localStorage.setItem("lastVideoID", id);
-          console.log("✅ Auto-saved video & metadata on unmount");
-        });
-      });
+    const metadata: VideoMetadata = {
+      id,
+      videoName: "Unsaved",
+      videoTags: [],
+      videoLength: length,
+      questionCards: videoSegments,
+      savedAt: new Date().toISOString(),
     };
-  }, []);
 
+    saveVideoToIndexedDB(metadata, videoFile).then(() => {
+      console.log("✅ Auto-saved updated segments to IndexedDB");
+      localStorage.setItem("lastVideoID", id);
+    });
+    localStorage.setItem("lastVideoID", id);
+  }, [videoSegments]);
+
+  // useEffect(() => {
+  //   console.log("Auto Save capabilities mounted.");
+
+  //   return () => {
+  //     const id = currentUniqueID.current;
+  //     const length = videoLength.current;
+  //     console.log("Auto-saving video with ID:", id, "and length:", length);
+  //     const videoFile = videoFileRef.current;
+  //     const questionCards = extractAllSegments();
+
+  //     console.log("EXTRACTED QUESTION CARDS", questionCards);
+
+  //     if (!videoFile) {
+  //       console.warn("No video file to persist");
+  //       return;
+  //     }
+
+  //     getVideoById(id).then((existing) => {
+  //       let metadata: VideoMetadata;
+
+  //       if (existing) {
+  //         // ✅ Update only the questionCards
+  //         metadata = {
+  //           ...existing.metadata,
+  //           questionCards,
+  //           savedAt: new Date().toISOString(), // optionally update timestamp
+  //         };
+  //         console.log("🔁 Updating existing video metadata only");
+  //       } else {
+  //         // ✅ New entry
+  //         metadata = {
+  //           id,
+  //           videoName: "Unsaved",
+  //           videoTags: [],
+  //           videoLength: length,
+  //           questionCards,
+  //           savedAt: new Date().toISOString(),
+  //         };
+  //         console.log("🆕 Saving new video entry");
+  //       }
+
+  //       saveVideoToIndexedDB(metadata, videoFile).then(() => {
+  //         localStorage.setItem("lastVideoID", id);
+  //         console.log("✅ Auto-saved video & metadata on unmount");
+  //       });
+  //     });
+  //   };
+  // }, []);
+
+  // useEffect(() => {
+  //   return () => {
+  //     const id = currentUniqueID.current;
+  //     localStorage.setItem("lastVideoID", id);
+  //     console.log("📝 Stored lastVideoID to localStorage on unmount:", id);
+  //   };
+  // }, []);
 
   useEffect(() => {
     const restoreFromIndexedDB = async (lastID: string) => {
-      console.log("RESTORING BAD BAD BAD")
       try {
         const result = await getVideoById(lastID);
         if (!result) return;
@@ -104,8 +129,8 @@ const VideoPlayerWithBar: React.FC = () => {
         videoFileRef.current = file;
         const objectURL = URL.createObjectURL(file);
 
-        // ✅ Restore segments directly (they now include all types)
-        setVideoSegments(metadata.questionCards); // questionCards now = all segments
+        // ✅ Restore segments directly (they now include all types) // questionCards now = all segments
+        console.log("Restoring segments:", metadata);
         videoLength.current = metadata.videoLength;
         currentUniqueID.current = metadata.id;
         setVideoSrc(objectURL);
@@ -114,6 +139,10 @@ const VideoPlayerWithBar: React.FC = () => {
         const calculatedWidth = metadata.videoLength * PIXELS_PER_SECOND;
         setBaseWidth(calculatedWidth);
         setInnerBarWidthPx((50 / 100) * calculatedWidth);
+
+        setVideoDuration(metadata.videoLength);
+        setWidthPercent(50);
+        setVideoSegments(metadata.questionCards);
 
         console.log("✅ Restored full timeline from IndexedDB");
       } catch (err) {
@@ -128,20 +157,25 @@ const VideoPlayerWithBar: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    console.log("🔄 videoSegments updated from IndexedDB", videoSegments);
+  }, [videoSegments]);
+
+  useEffect(() => {
     if (hasRestoredRef.current) {
-      console.log("loading saved")
+      console.log("loading saved");
       hasRestoredRef.current = false;
+      setuUpdateBar((prev) => !prev);
       return;
-    } else if (videoDroppedInRef.current){
+    } else if (videoDroppedInRef.current) {
       console.log("resetting everything", videoDuration);
-      setVideoSegments([{ source: [0, videoDuration] }]);
+      setVideoSegments([{ id: uuidv4(), source: [0, videoDuration] }]);
       videoLength.current = videoDuration;
       const calculatedWidth = videoLength.current * PIXELS_PER_SECOND;
       setBaseWidth(calculatedWidth);
       setInnerBarWidthPx((50 / 100) * calculatedWidth);
       currentUniqueID.current = uuidv4();
     }
-    console.log("ignored for handle dropped in already edited")
+    console.log("ignored for handle dropped in already edited");
   }, [videoDuration]);
 
   const videoSegmentsRef = useRef<VideoSegmentData[]>(videoSegments);
@@ -182,10 +216,13 @@ const VideoPlayerWithBar: React.FC = () => {
     }
   };
 
-  const handleUpdateWidth = useCallback((base: number, inner: number) => {
-    setBaseWidth(base);
-    setInnerBarWidthPx(inner);
-  }, [setBaseWidth, setInnerBarWidthPx]);
+  const handleUpdateWidth = useCallback(
+    (base: number, inner: number) => {
+      setBaseWidth(base);
+      setInnerBarWidthPx(inner);
+    },
+    [setBaseWidth, setInnerBarWidthPx],
+  );
 
   return (
     <>
@@ -242,6 +279,7 @@ const VideoPlayerWithBar: React.FC = () => {
       </div>
 
       <VideoBar
+        updateBar={updateBar}
         baseWidth={baseWidth}
         setVideoTime={setVideoTime}
         // setEditedLength={setEditedLength}

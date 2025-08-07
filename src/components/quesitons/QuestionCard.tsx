@@ -33,7 +33,10 @@ const QuestionCard: React.FC<QuestionCardData> = ({
   };
 
   return (
-    <div className={`question-card ${difficulty}`} onMouseDown={handleMouseDown}>
+    <div
+      className={`question-card ${difficulty}`}
+      onMouseDown={handleMouseDown}
+    >
       <div className="question-header">
         <div className="question-text">{question}</div>
         <div className={`question-type ${type}`}>{type}</div>
@@ -75,10 +78,10 @@ const QuestionCard: React.FC<QuestionCardData> = ({
         )}
       </div>
       <div className="question-footer">
-  <span className="footer-badge">{displayType ?? "anonymous"}</span>
-  {showWinner && <span className="footer-badge">🏆 Winner</span>}
-  {live && <span className="footer-badge">🔴 Live</span>}
-</div>
+        <span className="footer-badge">{displayType ?? "anonymous"}</span>
+        {showWinner && <span className="footer-badge">🏆 Winner</span>}
+        {live && <span className="footer-badge">🔴 Live</span>}
+      </div>
     </div>
   );
 };

@@ -18,11 +18,10 @@ const GhostOverlay = () => {
         let x = e.clientX;
         let y = e.clientY;
 
-        if (draggedItem.type === "question-card" && ghost.offsetWidth && ghost.offsetHeight) {
-          x -= (ghost.offsetWidth * scale) / 2;
-          y -= (ghost.offsetHeight * scale) / 2;
+        if (draggedItem.type === "question-card") {
+          y -= 65;
         } else {
-          console.log("Hello")
+          console.log("Hello");
           y -= 65; // ✅ Move right
           x -= 95;
         }

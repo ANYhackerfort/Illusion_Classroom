@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from "react";
 import "./QuestionDrag.css";
 import QuestionCard from "./QuestionCard";
-import type { QuestionCardData } from '../../types/QuestionCard';
+import type { QuestionCardData } from "../../types/QuestionCard";
 import { saveQuestion, getAllQuestions } from "../../indexDB/questionStorage";
 import { v4 as uuidv4 } from "uuid";
 
 const QuestionDropZone: React.FC = () => {
-  const [parsedQuestions, setParsedQuestions] = useState<QuestionCardData[]>([]);
+  const [parsedQuestions, setParsedQuestions] = useState<QuestionCardData[]>(
+    [],
+  );
 
   useEffect(() => {
     const loadFromDB = async () => {
@@ -26,14 +28,21 @@ const QuestionDropZone: React.FC = () => {
       const questions: QuestionCardData[] = [];
 
       for (const block of blocks) {
-        const lines = block.split("\n").map((line) => line.trim()).filter(Boolean);
+        const lines = block
+          .split("\n")
+          .map((line) => line.trim())
+          .filter(Boolean);
         const questionLine = lines.find((line) => line.startsWith("Q:"));
         const difficultyLine = lines.find((line) => line.startsWith("D:"));
         const typeLine = lines.find((line) => line.startsWith("T:"));
         const answerLines = lines.filter((line) => line.startsWith("A:"));
 
-        const difficulty = difficultyLine?.replace(/^D:\s*/, "").toLowerCase() as QuestionCardData["difficulty"];
-        const type = typeLine?.replace(/^T:\s*/, "").toLowerCase() as QuestionCardData["type"];
+        const difficulty = difficultyLine
+          ?.replace(/^D:\s*/, "")
+          .toLowerCase() as QuestionCardData["difficulty"];
+        const type = typeLine
+          ?.replace(/^T:\s*/, "")
+          .toLowerCase() as QuestionCardData["type"];
         const minAnswers = ["short", "slider", "ai"].includes(type) ? 1 : 2;
 
         if (

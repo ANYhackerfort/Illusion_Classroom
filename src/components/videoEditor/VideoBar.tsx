@@ -7,12 +7,8 @@ import QuestionSegment from "./QuestionSegment";
 import DefaultLengthControl from "./DefaultLengthControl";
 
 import type { QuestionCardData } from "../../types/QuestionCard";
-
-interface VideoSegmentData {
-  source: [number, number];
-  isQuestionCard?: boolean;
-  questionCardData?: QuestionCardData;
-}
+import { v4 as uuidv4 } from "uuid";
+import type { VideoSegmentData } from "../../types/QuestionCard";
 
 interface VideoBarProps {
   setVideoTime: (time: number) => void;
@@ -28,6 +24,7 @@ interface VideoBarProps {
   setBaseWidth: (width: number) => void;
   widthPercent: number;
   setWidthPercent: (width: number) => void;
+  updateBar: boolean;
 }
 
 const VideoBar: React.FC<VideoBarProps> = ({
@@ -42,6 +39,7 @@ const VideoBar: React.FC<VideoBarProps> = ({
   setBaseWidth,
   widthPercent,
   setWidthPercent,
+  updateBar,
 }) => {
   // const [widthPercent, setWidthPercent] = useState(50);
   const [defaultLength, setDefaultLength] = useState(10);
@@ -55,11 +53,9 @@ const VideoBar: React.FC<VideoBarProps> = ({
     const newWidth =
       (widthPercent / 100) * videoLength.current * PIXELS_PER_SECOND;
     setInnerBarWidthPx(newWidth);
-  }, [widthPercent]);
-
-    useEffect(() => {
-      console.log("SFSFSFSFJSOPFIJSOidfjoisj")
-  }, []);
+    setBaseWidth(widthPercent);
+    console.log("Setting inneSDSSSSSSSSSr bar width to", videoLength.current);
+  }, [widthPercent, updateBar]);
 
   const markers = useMemo(() => {
     const pixelSpacing = 100;
@@ -75,7 +71,7 @@ const VideoBar: React.FC<VideoBarProps> = ({
     }
 
     return result;
-  }, [innerBarWidthPx]);
+  }, [innerBarWidthPx, updateBar]);
 
   // const roundTo = (num: number, decimals = 12) => Number(num.toFixed(decimals));
 
@@ -83,82 +79,105 @@ const VideoBar: React.FC<VideoBarProps> = ({
     source: [number, number],
     time: number,
     questionCardData: QuestionCardData,
-    index: number,
+    id: string, // segment id to split
   ) => {
     const [start, end] = source;
     const questionEnd = time + defaultLength;
     const adjustedEnd = end + defaultLength;
 
     const preSegment: VideoSegmentData = {
+      id: uuidv4(),
       source: [start, time],
     };
+
     const questionSegment: VideoSegmentData = {
+      id: uuidv4(),
       source: [time, questionEnd],
       isQuestionCard: true,
       questionCardData,
     };
+
     const postSegment: VideoSegmentData = {
+      id: uuidv4(),
       source: [questionEnd, adjustedEnd],
     };
 
+    // grow total duration + widths
     videoLength.current += defaultLength;
-    const calculatedWidth = videoLength.current * PIXELS_PER_SECOND;
-    setBaseWidth(calculatedWidth);
-    setInnerBarWidthPx((widthPercent / 100) * calculatedWidth);
+    const fullPx = videoLength.current * PIXELS_PER_SECOND;
+    setBaseWidth(fullPx);
+    setInnerBarWidthPx((widthPercent / 100) * fullPx);
 
-    setVideoSegments((prev) =>
-      prev.flatMap((seg, i) => {
-        if (i === index) {
-          return [preSegment, questionSegment, postSegment];
-        } else if (i > index) {
-          const [s, e] = seg.source;
-          return [
-            {
-              ...seg,
-              source: [s + defaultLength, e + defaultLength],
-            },
-          ];
-        } else {
-          return [seg];
-        }
-      }),
-    );
+    setVideoSegments(prev => {
+      const idx = prev.findIndex(s => s.id === id);
+      if (idx === -1) return prev;
+
+      const updated: VideoSegmentData[] = [];
+
+      // segments before target
+      for (let i = 0; i < idx; i++) updated.push(prev[i]);
+
+      // replace target with 3 pieces
+      updated.push(preSegment, questionSegment, postSegment);
+
+      // shift all segments after target to the right by defaultLength
+      for (let i = idx + 1; i < prev.length; i++) {
+        const [s, e] = prev[i].source;
+        updated.push({ ...prev[i], source: [s + defaultLength, e + defaultLength] });
+      }
+
+      return updated;
+    });
   };
 
+
   const updateSegmentResize = useCallback(
-    (index: number, newEnd: number) => {
+    (id: string, newEnd: number) => {
       setVideoSegments((prevSegments) => {
-        const seg = prevSegments[index];
-        if (!seg) return prevSegments;
+        console.log("PREV ------------------- SEGMENTS", prevSegments);
 
+        const segIndex = prevSegments.findIndex((s) => s.id === id);
+        console.log("Updating --------------- segment resize for id", id, "at index", segIndex);
+        if (segIndex === -1) return prevSegments;
+
+        console.log(
+          "Updating segment resize for id",
+          id,
+          "at index",
+          segIndex,
+          "to new end",
+          newEnd,
+        );
+
+        const seg = prevSegments[segIndex];
         const [start, end] = seg.source;
-        const endDelta = newEnd - end;
-        if (endDelta === 0) return prevSegments;
+        const delta = newEnd - end;
+        if (delta === 0) return prevSegments;
 
-        // Build updated array based on prevSegments (no stale reads)
+        // 1) Build the updated segments array
         const updated = prevSegments.map((s, i) => {
-          if (i === index) {
+          if (i === segIndex) {
             return { ...s, source: [start, newEnd] as [number, number] };
           }
-          if (i > index) {
+          if (i > segIndex) {
             const [s0, s1] = s.source;
             return {
               ...s,
-              source: [s0 + endDelta, s1 + endDelta] as [number, number],
+              source: [s0 + delta, s1 + delta] as [number, number],
             };
           }
           return s;
         });
 
-        // Recompute total duration from last segment end (don't accumulate deltas)
+        // 2) Derive the new total duration from the last segment
         const lastEnd = updated[updated.length - 1]?.source[1] ?? 0;
-        const newDuration = Math.max(0, lastEnd);
+        videoLength.current = lastEnd;
+        console.log("New video length after resize:", videoLength.current);
 
-        // Update refs and widths from the recomputed duration
-        videoLength.current = newDuration;
-        const calculatedWidth = newDuration * PIXELS_PER_SECOND;
-        setBaseWidth(calculatedWidth);
-        setInnerBarWidthPx((widthPercent / 100) * calculatedWidth);
+        // 3) Recompute the bar widths
+        const fullPx = lastEnd * PIXELS_PER_SECOND;
+        setBaseWidth(fullPx);
+        setInnerBarWidthPx((widthPercent / 100) * fullPx);
 
         return updated;
       });
@@ -171,6 +190,11 @@ const VideoBar: React.FC<VideoBarProps> = ({
       videoLength,
     ],
   );
+
+  // const handleUpdatePositioning = useCallback(
+  //   (index: number, newstart: number) => {
+
+  //   }
 
   // ⏱️ Needle tracking using currentTimeRef
   const innerBarWidthPxRef = useRef(innerBarWidthPx);
@@ -234,49 +258,70 @@ const VideoBar: React.FC<VideoBarProps> = ({
     setInnerBarWidthPx(width);
   };
 
-  const handleDelete = (index: number) => {
-    const curr = videoSegments[index];
-    if (!curr) return;
+  const handleDelete = (id: string) => {
+    setVideoSegments((prevSegments) => {
+      const index = prevSegments.findIndex((seg) => seg.id === id);
+      if (index === -1) return prevSegments;
 
-    const [start, end] = curr.source;
-    const delta = end - start;
+      const curr = prevSegments[index];
+      const [start, end] = curr.source;
+      const delta = end - start;
 
-    const prev = videoSegments[index - 1];
-    const next = videoSegments[index + 1];
+      const prev = prevSegments[index - 1];
+      const next = prevSegments[index + 1];
 
-    if (prev && next) {
-      // Case 1: Merge prev and next
-      const minStart = prev.source[0];
-      const maxEnd = next.source[1] - delta;
+      if (prev && next) {
+        const shouldMerge = !prev.isQuestionCard && !next.isQuestionCard;
 
-      const mergedSegment = {
-        source: [minStart, maxEnd] as [number, number],
-      };
+        console.log("Should merge:", shouldMerge);
 
-      setVideoSegments((prevSegments) => {
-        const updated = [...prevSegments];
-        updated.splice(index - 1, 3, mergedSegment); // replace 3 segments
-        return updated;
-      });
+        if (shouldMerge) {
+          // ✅ Case 1: Merge prev + curr + next
+          const minStart = prev.source[0];
+          const maxEnd = next.source[1] - delta;
 
-      // const mergedLength = maxEnd - minStart;
-      // const totalRemoved =
-      //   prev.source[1] -
-      //   prev.source[0] +
-      //   (end - start) +
-      //   (next.source[1] - next.source[0]);
+          const mergedSegment: VideoSegmentData = {
+            id: uuidv4(),
+            source: [minStart, maxEnd],
+          };
 
-      // setVideoDuration((prev) => prev - totalRemoved + mergedLength);
-      videoLength.current = videoLength.current - delta;
-      const calculatedWidth = videoLength.current * PIXELS_PER_SECOND;
-      setBaseWidth(calculatedWidth);
-      setInnerBarWidthPx((widthPercent / 100) * calculatedWidth); // ✅ again here
-      console.log(videoSegments);
-    } else {
-      // Case 2: Just remove current segment, shift later segments
-      setVideoSegments((prevSegments) =>
-        prevSegments
-          .filter((_, i) => i !== index)
+          const updated = [...prevSegments];
+          updated.splice(index - 1, 3, mergedSegment);
+
+          for (let i = index; i < updated.length; i++) {
+            const [s, e] = updated[i].source;
+            updated[i] = {
+              ...updated[i],
+              source: [s - delta, e - delta] as [number, number],
+            };
+          }
+
+          recomputeFromSegments(updated);
+          return updated;
+        } else {
+          // ❌ Either prev, curr, or next is a question card — fallback to Case 2
+          console.log("❌ One is a question card — using Case 2 logic");
+
+          const updated = prevSegments
+            .filter((seg) => seg.id !== id)
+            .map((seg, i) => {
+              if (i < index) return seg;
+              const [s, e] = seg.source;
+              return {
+                ...seg,
+                source: [s - delta, e - delta] as [number, number],
+              };
+            });
+
+          recomputeFromSegments(updated);
+          return updated;
+        }
+      } else {
+        // ✅ Case 2: No merge possible
+        console.log("⚠️ No prev/next — using Case 2 logic");
+
+        const updated = prevSegments
+          .filter((seg) => seg.id !== id)
           .map((seg, i) => {
             if (i < index) return seg;
             const [s, e] = seg.source;
@@ -284,17 +329,220 @@ const VideoBar: React.FC<VideoBarProps> = ({
               ...seg,
               source: [s - delta, e - delta] as [number, number],
             };
-          }),
-      );
+          });
 
-      // setVideoDuration((prev) => prev - delta);
-      videoLength.current = videoLength.current - delta;
-      const calculatedWidth = videoLength.current * PIXELS_PER_SECOND;
-      setBaseWidth(calculatedWidth);
-      setInnerBarWidthPx((widthPercent / 100) * calculatedWidth); // ✅ again here
-      console.log(videoSegments);
-    }
+        recomputeFromSegments(updated);
+        return updated;
+      }
+    });
   };
+
+  // Helper to recalc video length + widths
+  const recomputeFromSegments = (segments: VideoSegmentData[]) => {
+    const lastEnd = segments.length ? segments[segments.length - 1].source[1] : 0;
+    videoLength.current = lastEnd;
+    const fullPx = lastEnd * PIXELS_PER_SECOND;
+    setBaseWidth(fullPx);
+    setInnerBarWidthPx((widthPercent / 100) * fullPx);
+  };
+
+  useEffect(() => {
+    console.log("🔄 videoSegments updated:", videoSegments);
+  }, [videoSegments]);
+
+  const updateSegmentPositioning = useCallback(
+    (id: string, shift: number) => {
+      setVideoSegments((prevSegments) => {
+        const segIndex = prevSegments.findIndex((s) => s.id === id);
+        console.log(
+          "Updating segment positioning for id",
+          id,
+          "at index",
+          segIndex,
+          "with shift",
+          shift,
+        );
+        if (segIndex === -1) return prevSegments;
+
+        if (shift >= 0) {
+          console.log("SHIFT AMOUNT", shift);
+          console.log("videoSegments:", prevSegments);
+
+          const seg = prevSegments[segIndex];
+          if (!seg) return prevSegments;
+
+          const [start, end] = seg.source;
+          const length = end - start;
+          const newStart = Math.max(start + shift, 0);
+          const newEnd = newStart + length;
+
+          const updated: VideoSegmentData[] = [];
+
+          // 1. Update the dragged segment
+          updated.push({ ...seg, source: [newStart, newEnd] });
+
+          // 2. Adjust later segments
+          for (let i = segIndex + 1; i < prevSegments.length; i++) {
+            const segi = prevSegments[i];
+            const [s, e] = segi.source;
+
+            if (newEnd > s) {
+              if (e <= newEnd) {
+                // Fully overlaps → shift
+                updated.push({
+                  ...segi,
+                  source: [s - length, e - length],
+                });
+              } else {
+                // Partial overlap → split
+                // keep id on the left piece, give a new id to the right piece
+                updated.push({
+                  ...segi,
+                  id: uuidv4(),
+                  source: [s - length, newEnd - length] as [number, number],
+                });
+                updated.push({
+                  ...segi,
+                  id: uuidv4(), // NEW: ensure unique id for the new split piece
+                  source: [newEnd, e] as [number, number],
+                });
+              }
+            } else {
+              // No conflict, just copy it
+              updated.push(segi);
+            }
+          }
+
+          // 3. Sort everything based on start
+          updated.sort((a, b) => a.source[0] - b.source[0]);
+
+          // 4. Append untouched segments from before segIndex
+          for (let i = segIndex - 1; i >= 0; i--) {
+            updated.unshift(prevSegments[i]);
+          }
+
+          // 5. Merge adjacent segments if possible
+          for (let i = 0; i < updated.length - 1; i++) {
+            const current = updated[i];
+            const next = updated[i + 1];
+
+            if (
+              current.source[1] === next.source[0] &&
+              !current.isQuestionCard &&
+              !next.isQuestionCard
+            ) {
+              updated[i] = {
+                ...current,
+                source: [current.source[0], next.source[1]],
+              };
+              updated.splice(i + 1, 1);
+              i--;
+            }
+          }
+
+          // 6. Update derived values
+          const lastEnd = updated[updated.length - 1]?.source[1] ?? 0;
+          videoLength.current = lastEnd;
+          const fullPx = lastEnd * PIXELS_PER_SECOND;
+          setBaseWidth(fullPx);
+          setInnerBarWidthPx((widthPercent / 100) * fullPx);
+
+          return updated;
+        } else {
+          const seg = prevSegments[segIndex];
+          if (!seg) return prevSegments;
+
+          const [start, end] = seg.source;
+          const length = end - start;
+          const newStart = Math.max(start + shift, 0);
+          const newEnd = newStart + length;
+
+          const updated: VideoSegmentData[] = [];
+
+          // 1. Update the dragged segment
+          updated.push({ ...seg, source: [newStart, newEnd] });
+
+          // 2. Adjust previous segments
+          for (let i = segIndex - 1; i >= 0; i--) {
+            const segi = prevSegments[i];
+            const [s, e] = segi.source;
+
+            if (e > newStart) {
+              if (s >= newStart) {
+                // Fully overlaps → shift
+                updated.push({
+                  ...segi,
+                  source: [s + length, e + length],
+                });
+              } else {
+                // Partial overlap → split
+                // left piece keeps its id, right piece gets a new id
+                updated.push({
+                  ...segi,
+                  id: uuidv4(),
+                  source: [s, newStart] as [number, number],
+                });
+                updated.push({
+                  ...segi,
+                  id: uuidv4(), // NEW: ensure unique id for the new split piece
+                  source: [newStart + length, e + length] as [number, number],
+                });
+              }
+            } else {
+              // No conflict, just copy it
+              updated.push(segi);
+            }
+          }
+
+          // 3. Sort everything based on start
+          updated.sort((a, b) => a.source[0] - b.source[0]);
+
+          // 4. Append untouched segments from segIndex + 1 forward
+          for (let i = segIndex + 1; i < prevSegments.length; i++) {
+            updated.push(prevSegments[i]);
+          }
+
+          // 5. Merge adjacent segments if possible
+          for (let i = 0; i < updated.length - 1; i++) {
+            const current = updated[i];
+            const next = updated[i + 1];
+
+            if (
+              current.source[1] === next.source[0] &&
+              !current.isQuestionCard &&
+              !next.isQuestionCard
+            ) {
+              updated[i] = {
+                ...current,
+                source: [current.source[0], next.source[1]],
+              };
+              updated.splice(i + 1, 1);
+              i--;
+            }
+          }
+
+          console.log("Updated segments after positioning:", updated);
+
+          // 6. Update derived values
+          const lastEnd = updated[updated.length - 1]?.source[1] ?? 0;
+          videoLength.current = lastEnd;
+          const fullPx = lastEnd * PIXELS_PER_SECOND;
+          setBaseWidth(fullPx);
+          setInnerBarWidthPx((widthPercent / 100) * fullPx);
+
+          return updated;
+        }
+      });
+    },
+    [
+      setVideoSegments,
+      setBaseWidth,
+      setInnerBarWidthPx,
+      widthPercent,
+      videoLength,
+      videoSegments, // left as-is per your request (no logic removed)
+    ],
+  );
 
   if (!innerBarWidthPx) return null;
 
@@ -342,20 +590,22 @@ const VideoBar: React.FC<VideoBarProps> = ({
           {videoSegments.map((segment, index) =>
             segment.isQuestionCard && segment.questionCardData ? (
               <QuestionSegment
-                key={index}
+                id={segment.id}
+                key={segment.id}
                 index={index}
                 source={segment.source}
-                multiplier={widthPercent / 100}
+                multiplier={widthPercent}
                 videoDurationRef={videoLength}
                 updateSegment={updateSegmentResize}
+                updateSegmentPositioning={updateSegmentPositioning}
                 questionCardData={segment.questionCardData}
                 setVideoPercent={handleSetVideoTime}
                 onDelete={handleDelete}
               />
             ) : (
               <VideoSegment
-                key={index}
-                index={index}
+                key={segment.id}
+                id={segment.id}
                 source={segment.source}
                 multiplier={widthPercent / 100}
                 videoDurationRef={videoLength}

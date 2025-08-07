@@ -1,15 +1,10 @@
 import React, { useRef, useEffect } from "react";
 import "./VideoDisplay.css";
-import { useMouse } from '../../hooks/drag/MouseContext';
-import { getVideoById } from '../../indexDB/videoStorage';
+import { useMouse } from "../../hooks/drag/MouseContext";
+import { getVideoById } from "../../indexDB/videoStorage";
 
 import type { QuestionCardData } from "../../types/QuestionCard";
-
-interface VideoSegmentData {
-  source: [number, number];
-  isQuestionCard?: boolean;
-  questionCardData?: QuestionCardData;
-}
+import type { VideoSegmentData } from "../../types/QuestionCard";
 
 interface VideoDisplayProps {
   videoTime: number;
@@ -28,7 +23,7 @@ interface VideoDisplayProps {
   videoDroppedRef: React.RefObject<boolean>;
   setVideoSegments: (segments: VideoSegmentData[]) => void;
   updateWidths: (base: number, inner: number) => void;
-  setWidthPercent: (widthPercent: number) => void; 
+  setWidthPercent: (widthPercent: number) => void;
 }
 
 const VideoDisplay: React.FC<VideoDisplayProps> = ({
@@ -57,6 +52,7 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
   const isPlayingRef = useRef(false); // actaul video
   const videoStoppedRef = useRef(true); // The entirety of video with question cards
   const videoOverRef = useRef(false);
+  const currentTimeDisplayRef = useRef<HTMLDivElement>(null);
 
   const { draggedItem } = useMouse();
 
@@ -76,9 +72,14 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
 
   useEffect(() => {
     const interval = setInterval(() => {
+      if (currentTimeDisplayRef.current) {
+        currentTimeDisplayRef.current.textContent = `${currentTimeRef.current.toFixed(1)}s`;
+      }
+
       if (currentTimeRef.current > editedLength.current) {
         currentTimeRef.current = 0;
       }
+
       if (videoOverRef.current === true) {
         //TODO: todo to give me form logic
         currentTimeRef.current = 0;
@@ -134,7 +135,7 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
   }, [videoSrc]);
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    console.log("Handle drop video called!")
+    console.log("Handle drop video called!");
     e.preventDefault();
     const file = e.dataTransfer.files[0];
     if (file && file.type.startsWith("video/")) {
@@ -320,7 +321,8 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
       }
 
       const { metadata, file } = result;
-      const { questionCards: storedSegments, videoLength: storedDuration } = metadata;
+      const { questionCards: storedSegments, videoLength: storedDuration } =
+        metadata;
 
       // Merge with current state
       setVideoSegments(storedSegments);
@@ -343,9 +345,9 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
 
       // 8) Reset video timer
       currentTimeRef.current = 0;
-      videoFileRef.current = file; 
+      videoFileRef.current = file;
 
-      isPlayingRef.current = false; 
+      isPlayingRef.current = false;
 
       setWidthPercent(50);
     }
@@ -372,9 +374,14 @@ const VideoDisplay: React.FC<VideoDisplayProps> = ({
             className="video-element"
             onClick={togglePlay}
             onLoadedMetadata={handleLoadedMetadata}
-            onEnded={handleEnded} // ✅ End of video handler
+            onEnded={handleEnded}
           />
         )}
+      </div>
+
+      {/* Time Display goes just below the video and aligned to the left */}
+      <div className="video-time-display-wrapper">
+        <div ref={currentTimeDisplayRef} className="video-time-display" />
       </div>
     </div>
   );

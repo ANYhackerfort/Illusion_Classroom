@@ -4,13 +4,7 @@ import VideoQuestionCard from "../videoEditor/VideoCard";
 import Display from "./VideoDisplay";
 
 import type { QuestionCardData } from "../../types/QuestionCard";
-
-
-interface VideoSegmentData {
-  source: [number, number];
-  isQuestionCard?: boolean;
-  questionCardData?: QuestionCardData;
-}
+import type { VideoSegmentData } from "../../types/QuestionCard";
 
 const VideoStatus: React.FC = () => {
   const [videoTime, setVideoTime] = useState(0);
@@ -33,7 +27,6 @@ const VideoStatus: React.FC = () => {
   const videoFileRef = useRef<File | null>(null);
   const hasRestoredRef = useRef(false);
 
-
   // useEffect(() => {
   //   const restoreFromServerDB = async (lastID: string) => {
   //     // restoring from server
@@ -42,7 +35,7 @@ const VideoStatus: React.FC = () => {
 
   useEffect(() => {
     if (hasRestoredRef.current) {
-      console.log("loading saved")
+      console.log("loading saved");
       hasRestoredRef.current = false;
       return;
     }
@@ -67,10 +60,13 @@ const VideoStatus: React.FC = () => {
   //   return videoSegmentsRef.current;
   // };
 
-  const handleUpdateWidth = useCallback((base: number, inner: number) => {
-    setBaseWidth(base);
-    setInnerBarWidthPx(inner);
-  }, [setBaseWidth, setInnerBarWidthPx]);
+  const handleUpdateWidth = useCallback(
+    (base: number, inner: number) => {
+      setBaseWidth(base);
+      setInnerBarWidthPx(inner);
+    },
+    [setBaseWidth, setInnerBarWidthPx],
+  );
 
   return (
     <>

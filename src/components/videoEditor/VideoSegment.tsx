@@ -4,7 +4,7 @@ import type { QuestionCardData } from "../../types/QuestionCard";
 
 interface VideoSegmentProps {
   source: [number, number]; // [start, end] in seconds
-  index: number;
+  id: string;
   multiplier: number;
   videoDurationRef: React.RefObject<number>;
   innerBarWidthPx: number;
@@ -13,7 +13,7 @@ interface VideoSegmentProps {
     source: [number, number],
     time: number,
     questionCardData: QuestionCardData,
-    index: number,
+    id: string,
   ) => void;
 }
 
@@ -23,7 +23,7 @@ const VideoSegment: React.FC<VideoSegmentProps> = ({
   videoDurationRef,
   setVideoPercent,
   splitAndAdd,
-  index,
+  id,
 }) => {
   const [start, setStart] = useState(source[0]);
   const [end, setEnd] = useState(source[1]);
@@ -72,7 +72,7 @@ const VideoSegment: React.FC<VideoSegmentProps> = ({
     const ratio = offsetX / rect.width;
     const seconds = start + (end - start) * ratio;
 
-    splitAndAdd(source, seconds, draggedItem.data, index);
+    splitAndAdd(source, seconds, draggedItem.data, id);
   };
 
   const handleMouseEnter = () => {
@@ -86,7 +86,7 @@ const VideoSegment: React.FC<VideoSegmentProps> = ({
   };
 
   // breathing animation keyframes via inline style
-  const breatheAnimation = `breathe-${index}`;
+  const breatheAnimation = `breathe-${id}`;
   const styleSheet = document.styleSheets[0];
   const existing = Array.from(styleSheet.cssRules).find(
     (r) => (r as CSSKeyframesRule).name === breatheAnimation,

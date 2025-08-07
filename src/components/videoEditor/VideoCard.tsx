@@ -25,7 +25,7 @@ const VideoQuestionCard: React.FC<QuestionCardProps> = ({
   const { setDraggedItem } = useMouse();
 
   const [displayTypeState] = useState<"face" | "initial" | "anonymous">(
-  displayType ?? "anonymous"
+    displayType ?? "anonymous",
   );
   const [showWinnerState] = useState<boolean>(showWinner ?? false);
   const [liveState] = useState<boolean>(live ?? false);
@@ -35,7 +35,7 @@ const VideoQuestionCard: React.FC<QuestionCardProps> = ({
       type: "question-card",
       data: { question, answers, difficulty, type },
     });
-    console.log(displayTypeState)
+    console.log(displayTypeState);
   };
 
   return (

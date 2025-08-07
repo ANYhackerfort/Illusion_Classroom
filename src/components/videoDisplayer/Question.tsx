@@ -4,7 +4,6 @@ import "./Question.css";
 
 import type { QuestionCardData } from "../../types/QuestionCard";
 
-
 interface QuestionDudProps {
   index: number;
   source: [number, number];
@@ -64,7 +63,6 @@ const QuestionDud: React.FC<QuestionDudProps> = ({
         onMouseDown={handleMouseDown}
         className={`segment question-segment ${questionCardData.difficulty}`}
         onContextMenu={(e) => e.preventDefault()}
-      
         style={{
           position: "absolute",
           width: `${wPx}px`,
@@ -82,7 +80,6 @@ const QuestionDud: React.FC<QuestionDudProps> = ({
           gap: "4px",
         }}
       >
-
         {[
           {
             content: questionCardData.question,

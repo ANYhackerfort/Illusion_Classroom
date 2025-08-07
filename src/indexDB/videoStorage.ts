@@ -1,12 +1,5 @@
 // src/utils/videoStorage.ts
-
-import type { QuestionCardData } from "../types/QuestionCard";
-
-export interface VideoSegmentData {
-  source: [number, number];
-  isQuestionCard?: boolean;
-  questionCardData?: QuestionCardData;
-}
+import type { VideoSegmentData } from "../types/QuestionCard";
 
 export interface VideoMetadata {
   id: string;
