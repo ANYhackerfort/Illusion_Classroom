@@ -18,11 +18,7 @@ const BotsPage: React.FC = () => {
           change this later down below.
         </p>
 
-        <VideoDropBox
-          onVideoDrop={(files) => {
-            console.log("Dropped videos:", files); // replace with real logic later
-          }}
-        />
+        <VideoDropBox />
       </div>
 
       <div className="settings-row">

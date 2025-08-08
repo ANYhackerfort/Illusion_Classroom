@@ -50,7 +50,7 @@ const QuestionSegment: React.FC<QuestionSegmentProps> = ({
   }, [source]);
 
   useEffect(() => {
-    setWPx((end - start) *  multiplier);
+    setWPx((end - start) * multiplier);
     setLPx(start * multiplier);
   }, [start, end, multiplier]);
 
@@ -94,7 +94,7 @@ const QuestionSegment: React.FC<QuestionSegmentProps> = ({
 
     const handleMouseMove = (e: MouseEvent) => {
       const dx = e.clientX - mouseDownLocation.current;
-      const deltaSeconds = (dx / multiplier);
+      const deltaSeconds = dx / multiplier;
       console.log("ZZZZZZZ", originalEndRef.current, deltaSeconds);
       const newEnd = Math.max(
         originalEndRef.current + deltaSeconds,
@@ -129,12 +129,12 @@ const QuestionSegment: React.FC<QuestionSegmentProps> = ({
 
       updateSegmentPositioning(id, left - start); // adjust left position
 
-      console.log("THE INDEX IS", index)
+      console.log("THE INDEX IS", index);
       updateSegment(id, right);
       // update start and end
     } else if (left !== start) {
-      console.log("Left changed, right remains the same", left-start);
-      updateSegmentPositioning(id, left-start); // adjust left position
+      console.log("Left changed, right remains the same", left - start);
+      updateSegmentPositioning(id, left - start); // adjust left position
       // update start
     } else if (right !== end) {
       console.log("Right changed, left remains the same");

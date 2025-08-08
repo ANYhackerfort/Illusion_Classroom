@@ -1,48 +1,46 @@
 .bot-display-container {
   position: relative;
   width: 100%;
-  max-width: 800px;
-  height: 300px;
-  margin: 24px auto;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  height: 100%;
+  min-height: 860px;
 }
 
-/* Background layer */
 .bot-display-background {
-  background-color: #f0f0f0;
-  width: 100%;
-  height: 100%;
+  position: absolute;
+  inset: 0;
+  background: #111; /* dark backdrop like Zoom */
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
 }
 
 .bot-display-text {
-  font-size: 20px;
-  font-weight: 600;
-  color: #000;
+  color: rgba(255, 255, 255, 0.12);
+  font-size: 4rem;
+  user-select: none;
 }
 
-/* Top overlay grid */
 .bot-display-overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
+  position: relative;
+  z-index: 1;
+  padding: 16px;
   height: 100%;
-  pointer-events: none; /* pass-through for now */
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow: auto; /* scroll if the grid gets tall */
 }
 
-.bot-grid-placeholder {
-  width: 90%;
-  height: 90%;
-  border: 2px dashed #ccc;
-  border-radius: 12px;
-  background-color: rgba(255, 255, 255, 0.5);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+/* Zoom-style responsive grid */
+.bot-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  align-items: start;
+}
+
+/* States */
+.bot-display-loading,
+.bot-display-empty {
+  color: #ddd;
+  font-size: 1rem;
+  text-align: center;
+  padding: 24px 0;
 }

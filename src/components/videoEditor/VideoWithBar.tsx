@@ -27,6 +27,9 @@ const VideoPlayerWithBar: React.FC = () => {
   const [widthPercent, setWidthPercent] = useState(50);
   const [updateBar, setuUpdateBar] = useState(false);
 
+  const currentVideoNameRef = useRef<string>("Unsaved");
+  const currentVideoTagsRef = useRef<string[]>([]);
+
   const videoDroppedInRef = useRef(false);
 
   const currentUniqueID = useRef<string>("");
@@ -36,27 +39,51 @@ const VideoPlayerWithBar: React.FC = () => {
 
   const hasRestoredRef = useRef(false);
 
+  const currentSegmentsRef = useRef<VideoSegmentData[]>([]);
+  const previousSegmentsRef = useRef<VideoSegmentData[]>([]);
+
   useEffect(() => {
-    const id = currentUniqueID.current;
-    const length = videoLength.current;
-    const videoFile = videoFileRef.current;
-    if (!videoFile || videoSegments.length === 0) return;
-
-    const metadata: VideoMetadata = {
-      id,
-      videoName: "Unsaved",
-      videoTags: [],
-      videoLength: length,
-      questionCards: videoSegments,
-      savedAt: new Date().toISOString(),
-    };
-
-    saveVideoToIndexedDB(metadata, videoFile).then(() => {
-      console.log("✅ Auto-saved updated segments to IndexedDB");
-      localStorage.setItem("lastVideoID", id);
-    });
-    localStorage.setItem("lastVideoID", id);
+    currentSegmentsRef.current = videoSegments;
   }, [videoSegments]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const current = currentSegmentsRef.current;
+      const previous = previousSegmentsRef.current;
+      console.log("Checking for changes in segments...");
+
+      // Check if segments changed (shallow compare for now)
+      const changed = JSON.stringify(current) !== JSON.stringify(previous);
+      console.log("Checking for changes:", changed);
+
+      if (changed) {
+        previousSegmentsRef.current = [...current]; // update previous
+
+        const id = currentUniqueID.current;
+        const length = videoLength.current;
+        const videoFile = videoFileRef.current;
+        if (!videoFile || current.length === 0) return;
+
+        const metadata: VideoMetadata = {
+          id,
+          videoName: hasRestoredRef.current
+            ? currentVideoNameRef.current
+            : "Unsaved",
+          videoTags: hasRestoredRef.current ? currentVideoTagsRef.current : [],
+          videoLength: length,
+          questionCards: current,
+          savedAt: new Date().toISOString(),
+        };
+
+        saveVideoToIndexedDB(metadata, videoFile).then(() => {
+          console.log("✅ Auto-saved updated segments to IndexedDB");
+          localStorage.setItem("lastVideoID", id);
+        });
+      }
+    }, 20000); // every 20 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   // useEffect(() => {
   //   console.log("Auto Save capabilities mounted.");
@@ -128,6 +155,9 @@ const VideoPlayerWithBar: React.FC = () => {
         // 🎥 Restore file
         videoFileRef.current = file;
         const objectURL = URL.createObjectURL(file);
+
+        currentVideoNameRef.current = metadata.videoName || "Unsaved";
+        currentVideoTagsRef.current = metadata.videoTags || [];
 
         // ✅ Restore segments directly (they now include all types) // questionCards now = all segments
         console.log("Restoring segments:", metadata);

@@ -1,23 +1,56 @@
+/* VideoDropBox.css */
 .video-drop-box {
-  background-color: #f9f9f9;
-  border-radius: 16px;
-  padding: 40px;
-  margin: 12px;
-  min-height: 150px;
-  min-width: 300px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15); /* 💥 Heavier shadow */
-  transition:
-    border-color 0.2s,
-    background-color 0.2s;
+  border: 1px solid #aaa;
+  border-radius: 12px;
+  padding: 16px; /* slightly less padding for more horizontal fit */
+  min-height: 220px;
+  max-height: 700px; /* limit height */
+  overflow-y: auto; /* scroll if content exceeds max height */
   display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #555;
-  font-size: 14px;
-  text-align: center;
+  flex-wrap: wrap; /* allow horizontal wrapping of cards */
+  gap: 12px; /* space between items */
+  transition: background 0.2s ease;
+}
+
+/* Modern thin scrollbar styling */
+.video-drop-box::-webkit-scrollbar {
+  width: 8px;
+}
+
+.video-drop-box::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.4);
+  border-radius: 4px;
+}
+
+.video-drop-box::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.video-drop-box::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .video-drop-box.dragging {
-  border-color: #999;
-  background-color: #f0f0f0;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.video-drop-box > p {
+  margin: 0 0 12px 0;
+  color: #555;
+  font-size: 14px;
+}
+
+.bot-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+  width: 100%;
+}
+
+.drop-message {
+  text-align: center;
+  color: #666;
+  width: 100%; /* span full width */
+  margin: 0px 0; /* give it a bit of spacing */
+  padding-top: 8.8%;
 }

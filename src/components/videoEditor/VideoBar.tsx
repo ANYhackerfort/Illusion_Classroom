@@ -108,8 +108,8 @@ const VideoBar: React.FC<VideoBarProps> = ({
     setBaseWidth(fullPx);
     setInnerBarWidthPx((widthPercent / 100) * fullPx);
 
-    setVideoSegments(prev => {
-      const idx = prev.findIndex(s => s.id === id);
+    setVideoSegments((prev) => {
+      const idx = prev.findIndex((s) => s.id === id);
       if (idx === -1) return prev;
 
       const updated: VideoSegmentData[] = [];
@@ -123,13 +123,15 @@ const VideoBar: React.FC<VideoBarProps> = ({
       // shift all segments after target to the right by defaultLength
       for (let i = idx + 1; i < prev.length; i++) {
         const [s, e] = prev[i].source;
-        updated.push({ ...prev[i], source: [s + defaultLength, e + defaultLength] });
+        updated.push({
+          ...prev[i],
+          source: [s + defaultLength, e + defaultLength],
+        });
       }
 
       return updated;
     });
   };
-
 
   const updateSegmentResize = useCallback(
     (id: string, newEnd: number) => {
@@ -137,7 +139,12 @@ const VideoBar: React.FC<VideoBarProps> = ({
         console.log("PREV ------------------- SEGMENTS", prevSegments);
 
         const segIndex = prevSegments.findIndex((s) => s.id === id);
-        console.log("Updating --------------- segment resize for id", id, "at index", segIndex);
+        console.log(
+          "Updating --------------- segment resize for id",
+          id,
+          "at index",
+          segIndex,
+        );
         if (segIndex === -1) return prevSegments;
 
         console.log(
@@ -339,7 +346,9 @@ const VideoBar: React.FC<VideoBarProps> = ({
 
   // Helper to recalc video length + widths
   const recomputeFromSegments = (segments: VideoSegmentData[]) => {
-    const lastEnd = segments.length ? segments[segments.length - 1].source[1] : 0;
+    const lastEnd = segments.length
+      ? segments[segments.length - 1].source[1]
+      : 0;
     videoLength.current = lastEnd;
     const fullPx = lastEnd * PIXELS_PER_SECOND;
     setBaseWidth(fullPx);

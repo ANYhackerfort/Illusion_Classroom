@@ -92,10 +92,9 @@ const HomeIcon = (
     width="20"
     height="20"
     viewBox="0 0 24 24"
-    fill="white"
     xmlns="http://www.w3.org/2000/svg"
   >
-    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+    <circle cx="12" cy="12" r="8" fill="red" />
   </svg>
 );
 
@@ -173,7 +172,7 @@ const LeftTaskBar: React.FC<LeftTaskBarProps> = ({ onSelect }) => {
         />
         <TaskBarButton
           icon={HomeIcon}
-          label="Return Home"
+          label="Return LIVE"
           onClick={() => onSelect(101)}
         />
       </div>
@@ -192,12 +191,13 @@ const LeftTaskBar: React.FC<LeftTaskBarProps> = ({ onSelect }) => {
           onClick={() => onSelect(1)}
         />
 
+        <TaskBarButton icon={BotIcon} label="Bot" onClick={() => onSelect(2)} />
+
         <TaskBarButton
           icon={QuestionIcon}
           label="Question Control"
           onClick={() => onSelect(3)}
         />
-        <TaskBarButton icon={BotIcon} label="Bot" onClick={() => onSelect(2)} />
       </div>
       <div className="section-label">Data</div>
       <div className="taskbar-buttons-group">
